@@ -19,7 +19,7 @@ export default class TodayCommand extends Command {
         
         Cache.bot.sendMessage(
             msg.chat.id,
-            "Функция временно не доступна!",
+            "Функция временно недоступна!",
             {
                 parse_mode: "HTML",
                 reply_markup: {
