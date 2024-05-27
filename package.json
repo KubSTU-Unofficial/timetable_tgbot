@@ -1,0 +1,31 @@
+{
+  "name": "kubstu_timetable_tgbot",
+  "main": "./dist/index.js",
+  "type": "module",
+  "dependencies": {
+    "cron": "^3.1.6",
+    "fs": "^0.0.1-security",
+    "https": "^1.0.0",
+    "mongoose": "^8.1.2",
+    "node-fetch": "^3.3.2",
+    "node-html-parser": "^6.1.12",
+    "node-telegram-bot-api": "^0.63.0",
+    "typescript-eslint": "^7.5.0"
+  },
+  "devDependencies": {
+    "@types/node-telegram-bot-api": "^0.64.2",
+    "@typescript-eslint/eslint-plugin": "^7.5.0",
+    "@typescript-eslint/parser": "^7.5.0",
+    "eslint": "^8.56.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "scripts": {
+    "start": "node --env-file=.env ."
+  },
+  "author": "Elektroplayer",
+  "license": "ISC",
+  "description": "Lessons parser for KubSTU's schedule",
+  "version": "3.0.0"
+}
