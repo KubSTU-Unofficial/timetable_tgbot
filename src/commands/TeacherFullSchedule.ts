@@ -29,7 +29,9 @@ export default class TodayCommand extends Command {
         let date  = new Date();
         let num   = weekNumber(date);
         let days  = schedule.days.filter(elm => elm.even == week);
-        let out = "";
+        let out   = `<u><b>${week ? "ЧЁТНАЯ" : "НЕЧЁТНАЯ"} НЕДЕЛЯ:</b></u>\n`;
+
+        if(!days.length) return out + `На этой неделе у преподавателя нет пар...`;
 
         let dict:{[index: string]: string} = {
             "Лабораторная": "Лаб",
@@ -40,8 +42,6 @@ export default class TodayCommand extends Command {
         // Находим понедельник
         date.setHours(0, 0, 0, 0);
         date.setDate(date.getDate() - (date.getDay() || 7) + (((date.getWeek()%2 == 0) != week) ? 7 : 0) + days[0].daynum);
-
-        out += `<u><b>${week ? "ЧЁТНАЯ" : "НЕЧЁТНАЯ"} НЕДЕЛЯ:</b></u>\n`;
 
         days.forEach((day, i, arr) => {
             out += `\n<b>${this.days[day.daynum]} | ${date.stringDate()}</b>\n`;
