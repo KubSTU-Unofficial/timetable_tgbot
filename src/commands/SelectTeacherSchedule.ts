@@ -26,18 +26,31 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if(!user.group) return;
 
-        user.setScene("teachers");
+        
 
         let schedule = await user.group.getFullRawSchedule();
         let teachers: string[] = [];
 
         if(schedule) {
-            schedule.days.forEach(day => {
-                day.daySchedule.forEach(lesson => {
-                    if(lesson.teacher !== "Не назначен" && !teachers.includes(lesson.teacher!)) teachers.push(lesson.teacher!);
-                });
+            schedule.forEach(lesson => {
+                if(lesson.teacher !== "Не назначен" && !teachers.includes(lesson.teacher!)) teachers.push(lesson.teacher!);
             });
         }
+
+        if(!teachers.length) {
+            Cache.bot.sendMessage(msg.chat.id, "Преподаватели не найдены!", {
+                parse_mode: "HTML",
+                reply_markup: {
+                    keyboard: user.getMainKeyboard(),
+                    resize_keyboard: true,
+                    remove_keyboard: msg.chat.type !== "private"
+                }
+            });
+
+            return;
+        }
+        
+        user.setScene("teachers");
 
         let buttons = teachers.map(name => this.buttonFormat(this.nameFormat(name)));
         let keyboard:( {text: string}[] )[] = [];

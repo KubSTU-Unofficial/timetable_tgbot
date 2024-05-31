@@ -41,7 +41,8 @@ export default class NearestCommand extends Command {
                 parse_mode: "HTML",
                 reply_markup: {
                     remove_keyboard: msg.chat.type !== "private"
-                }
+                },
+                disable_web_page_preview: true
             }
         );
     }

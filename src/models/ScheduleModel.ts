@@ -5,37 +5,38 @@ const schema = new mongoose.Schema({
         type: String,
         required: true,
     },
-    inst_id: {
-        type: Number,
-        required: true,
-    },
     updateDate: {
         type: Date,
-        required: true
+        required: true,
+        default: new Date()
     },
-    days: [{
-        daynum: {
-            type: Number,
-            required: true,
+    data: [{
+        "nedtype": {
+            "nedtype_id": Number,
+            "nedtype_name": String
         },
-        even: {
-            type: Boolean,
-            required: true,
+        "dayofweek": {
+            "dayofweek_id": Number,
+            "dayofweek_name": String
         },
-        daySchedule: [{
-            number: Number,
-            time: String,
-            name: String,
-            paraType: String,
-            teacher: String,
-            auditory: String,
-            remark: String,
-            percent: String,
-            period: String,
-            flow: Boolean
-        }]
+        "pair": Number,
+        "kindofnagr": {
+            "kindofnagr_id": Number,
+            "kindofnagr_name": String
+        },
+        "disc": {
+            "disc_id": Number,
+            "disc_name": String
+        },
+        "ned_from": Number,
+        "ned_to": Number,
+        "persent_of_gr": Number,
+        "ispotok": Boolean,
+        "classroom": String,
+        "isdistant": Boolean,
+        "teacher": String,
+        "comment": String
     }]
 }, { collection: "schedules", versionKey: false });
 
 export default mongoose.model("schedules", schema);
-

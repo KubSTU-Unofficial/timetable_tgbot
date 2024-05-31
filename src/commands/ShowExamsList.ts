@@ -17,15 +17,14 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if(!user.group) return;
         
-        Cache.bot.sendMessage(
-            msg.chat.id,
-            "Функция временно недоступна!",
-            {
-                parse_mode: "HTML",
-                reply_markup: {
-                    remove_keyboard: msg.chat.type !== "private"
-                }
-            }
-        );
+        let text = await user.group.getTextExams() ?? "<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>";
+        
+        Cache.bot.sendMessage(msg.chat.id, text, {
+            parse_mode: "HTML",
+            reply_markup: {
+                remove_keyboard: msg.chat.type !== "private"
+            },
+            disable_web_page_preview: true
+        });
     }
 }

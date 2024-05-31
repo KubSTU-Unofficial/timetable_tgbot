@@ -5,9 +5,46 @@ declare global {
         interface ProcessEnv {
             MONGO_URI: string;
             TOKEN: string;
+            KUBSTI_API: string;
         }
     }
 
+    // Нужны для APIConvertor и structures/Group
+    interface IOFORespPara {
+        "nedtype": {
+            "nedtype_id": number,
+            "nedtype_name": string
+        },
+        "dayofweek": {
+            "dayofweek_id": number,
+            "dayofweek_name": string
+        },
+        "pair": number,
+        "kindofnagr": {
+            "kindofnagr_id": number,
+            "kindofnagr_name": string
+        },
+        "disc": {
+            "disc_id": number,
+            "disc_name": string
+        },
+        "ned_from": number,
+        "ned_to": number,
+        "persent_of_gr": number,
+        "ispotok": boolean,
+        "classroom": string,
+        "isdistant": boolean,
+        "teacher": string,
+        "comment": string
+    }
+    
+    interface IOFOResp {
+        "isok": boolean,
+        "data": IOFORespPara[],
+        "error_message": string | null
+    }
+
+    // Для правильной работы Date, с изменённым прототипом
     interface Date {
         getWeek(): number;
         stringDate(): string;

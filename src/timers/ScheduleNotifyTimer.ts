@@ -1,13 +1,14 @@
 import Timer from "../structures/Timer.js";
 import Users from "../models/UsersModel.js";
 import Cache from "../lib/Cache.js";
+import Group from "../structures/Group.js";
 import { CronJob } from "cron";
 
 export default class NotificationsTimer extends Timer {
     time = 0;
 
     async init() {
-        new CronJob('0 40 9 * * 0-5', this.exec, null, true, 'Europe/Moscow', { time: 9 });   // После первой пары
+        new CronJob('0 40 9 * * 0-5',  this.exec, null, true, 'Europe/Moscow', { time: 9  }); // После первой пары
         new CronJob('0 20 11 * * 0-5', this.exec, null, true, 'Europe/Moscow', { time: 11 }); // второй
         new CronJob('0 20 13 * * 0-5', this.exec, null, true, 'Europe/Moscow', { time: 12 }); // третьей
         new CronJob('0 00 15 * * 0-5', this.exec, null, true, 'Europe/Moscow', { time: 14 }); // четвёртой
@@ -38,7 +39,7 @@ export default class NotificationsTimer extends Timer {
 
             if (todayScheduleArray.length == 0) {
                 if (this.time != 9) return; // ...расписания на сегодня нет, а время уже не 9
-            } else if (this.time != +todayScheduleArray[todayScheduleArray.length - 1].time.split(":")[1].split(" - ")[1]) return; // ...ещё не время (отправляем только, после пар)
+            } else if (this.time != +(Group.lessonsTypes[todayScheduleArray[todayScheduleArray.length - 1].pair]).split(":")[1].split(" - ")[1]) return; // ...ещё не время (отправляем только, после пар)
 
             console.log(`[notify] ${user.id}, ${user.group?.name}`);
 
@@ -47,11 +48,7 @@ export default class NotificationsTimer extends Timer {
             let events = await user.group.getTextEvents(dateTomorrow);
             if (events) text += `\n\n${events}`;
 
-            Cache.bot.sendMessage(
-                user.id,
-                text,
-                { parse_mode: "HTML" }
-            ).catch(err => {
+            Cache.bot.sendMessage(user.id, text, { parse_mode: "HTML" }).catch(err => {
                 if([ // 50 оттенков "Не могу отправить сообщение"
                     "Error: ETELEGRAM: 403 Forbidden: bot was blocked by the user",
                     "Error: ETELEGRAM: 400 Bad Request: chat not found",

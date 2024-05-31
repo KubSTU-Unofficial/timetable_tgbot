@@ -3,7 +3,7 @@ import Command from "../structures/Command.js";
 import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
 import TeacherScheduleModel from "../models/TeacherScheduleModel.js";
-import { weekNumber } from "../lib/Utils.js";
+import { weekNumber, days as daysWeek } from "../lib/Utils.js";
 
 interface ITeacherSchedule {
     days: ITeacherDay[],
@@ -14,8 +14,6 @@ interface ITeacherSchedule {
 export default class TodayCommand extends Command {
     name = {};
     sceneName = ["teachers"];
-
-    days = ["ВОСКРЕСЕНЬЕ", "ПОНЕДЕЛЬНИК", "ВТОРНИК", "СРЕДА", "ЧЕТВЕРГ", "ПЯТНИЦА", "СУББОТА"];
 
     nameFormat(name:string) {
         let nameArr = name.split(" ");
@@ -44,7 +42,7 @@ export default class TodayCommand extends Command {
         date.setDate(date.getDate() - (date.getDay() || 7) + (((date.getWeek()%2 == 0) != week) ? 7 : 0) + days[0].daynum);
 
         days.forEach((day, i, arr) => {
-            out += `\n<b>${this.days[day.daynum]} | ${date.stringDate()}</b>\n`;
+            out += `\n<b>${daysWeek[day.daynum]} | ${date.stringDate()}</b>\n`;
             
             day.daySchedule.forEach(lesson => {
                 let para = `${lesson.number}. ${lesson.name} [${dict[lesson.paraType] ?? lesson.paraType}]\n` +
@@ -86,10 +84,8 @@ export default class TodayCommand extends Command {
         };
 
         if(schedule) {
-            schedule.days.forEach(day => {
-                day.daySchedule.forEach(lesson => {
-                    if(lesson.teacher && lesson.teacher !== "Не назначен" && !dict[this.nameFormat(lesson.teacher)]) dict[this.nameFormat(lesson.teacher)] = lesson.teacher;
-                });
+            schedule.forEach(lesson => {
+                if(lesson.teacher && lesson.teacher !== "Не назначен" && !dict[this.nameFormat(lesson.teacher)]) dict[this.nameFormat(lesson.teacher)] = lesson.teacher;
             });
         }
 

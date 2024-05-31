@@ -26,14 +26,10 @@ export default class TodayCommand extends Command {
         let lessons:{[key:string]: { [key: string]: string[] }} = {};
 
         if(schedule) {
-            schedule.days.forEach(day => {
-                day.daySchedule.forEach(lesson => {
-                    if(!lesson.teacher || lesson.teacher == "Не назначен") return;
-
-                    if(!lessons[lesson.name]) lessons[lesson.name] = {};
-                    if(!lessons[lesson.name][lesson.teacher]) lessons[lesson.name][lesson.teacher] = [];
-                    if(!lessons[lesson.name][lesson.teacher].includes(lesson.paraType)) lessons[lesson.name][lesson.teacher].push(lesson.paraType);
-                });
+            schedule.forEach(lesson => {
+                if(!lessons[lesson.disc.disc_name]) lessons[lesson.disc.disc_name] = {};
+                if(!lessons[lesson.disc.disc_name][lesson.teacher]) lessons[lesson.disc.disc_name][lesson.teacher] = [];
+                if(!lessons[lesson.disc.disc_name][lesson.teacher].includes(lesson.kindofnagr.kindofnagr_name)) lessons[lesson.disc.disc_name][lesson.teacher].push(lesson.kindofnagr.kindofnagr_name);
             });
         }
 
@@ -51,7 +47,8 @@ export default class TodayCommand extends Command {
             msg.chat.id, out,
             {
                 parse_mode: "HTML",
-                reply_markup: { remove_keyboard: msg.chat.type !== "private" }
+                reply_markup: { remove_keyboard: msg.chat.type !== "private" },
+                disable_web_page_preview: true
             }
         );
     }

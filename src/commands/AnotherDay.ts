@@ -50,7 +50,8 @@ export default class SelectingDayCommand extends Command {
                 reply_markup: {
                     keyboard: user.getMainKeyboard(),
                     resize_keyboard: true
-                }
+                },
+                disable_web_page_preview: true
             }
         );
     }

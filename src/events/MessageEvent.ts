@@ -2,7 +2,7 @@ import TelegramBot from "node-telegram-bot-api";
 import Event from "../structures/Event.js";
 import Cache from "../lib/Cache.js";
 import Middleware from "../structures/Middleware.js";
-import { commandName } from "../lib/Utils.js";
+import Command from "../structures/Command.js";
 
 export default class MessageEvent extends Event {
     name = "message" as BotEvents;
@@ -16,7 +16,7 @@ export default class MessageEvent extends Event {
 
         if (!user.scene) user.setScene("main");
 
-        let command = user.scene!.commands.find((c) => commandName(c.name).includes(msg.text!) ) ?? user.scene!.commands.find(c => commandName(c.name).length == 0);
+        let command = user.scene!.commands.find((c) => Command.commandName(c.name).includes(msg.text!) ) ?? user.scene!.commands.find(c => Command.commandName(c.name).length == 0);
 
         if (!command) {
             if (msg.chat.type == "private") {
@@ -35,7 +35,7 @@ export default class MessageEvent extends Event {
             // Если сообщение не является командой, я не увижу ваше сообщение
             // В добавок в группе можно отключить доступ к сообщениям у бота, команды будут работать
 
-            console.log(`[message] ${msg.from?.username ?? msg.from?.first_name ?? "Нет ника (?)"}, ${msg.from.id}: ${user.group?.name ?? "Не выбрана"}; ${user.scene!.name == "loginpassword" ? "Ввод пароля" : msg.text};` );
+            console.log(`[message] ${msg.from?.username ?? msg.from?.first_name ?? "Нет ника (?)"}, ${msg.from.id}: ${user.group?.name ?? "Не выбрана"}; ${msg.text};` );
 
             // await command.middlewares.filter(mw => mw.type == Middleware.types.Pre).forEach(async mw => {
             //     await mw.exec(user, msg);

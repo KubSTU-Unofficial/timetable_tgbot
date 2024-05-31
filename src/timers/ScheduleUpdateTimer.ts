@@ -1,9 +1,9 @@
 import Timer from "../structures/Timer.js";
 import { CronJob } from "cron";
-import Parser from "../structures/OLectionsParser.js";
-import { groupsParser, insts } from "../lib/Utils.js";
 import ScheduleModel from "../models/ScheduleModel.js";
+import APIConvertor from "../lib/APIConvertor.js";
 import TeacherScheduleModel from '../models/TeacherScheduleModel.js';
+import Group from '../structures/Group.js';
 
 export default class UpdaterTimer extends Timer {
     async init() {
@@ -29,59 +29,40 @@ export default class UpdaterTimer extends Timer {
     }
 
     async exec() {
-        await this.updateSchedules();
-        await this.updateTeacherSchedules();
+        this.updateSchedules().then(() => {
+            this.updateTeacherSchedules();
+        });
     }
 
     async updateSchedules() {
         console.log("[updater] Приступаю к обновлению расписаний!");
+        console.log("[updater] Получаю список групп");
 
-        let inst_id: number;
-        let groups: string[] | undefined;
-        let parser: Parser;
-        let group: string;
-        let days: IDay[] | undefined;
+        let now = new Date();
+        let ugod  = now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1);
+        let sem   = now.getMonth() > 5 ? 1 : 2;
+
+        let resp = await APIConvertor.ofoGroupsList(ugod);
+
+        console.log(`[updater] Ответ:`, resp);
+
+        if(!resp || !resp.isok) return console.log("[updater] Ошибка!", resp?.error_message);
+
+        let groups = resp.data.map(g => g.name);
         let bulk = ScheduleModel.collection.initializeOrderedBulkOp();
-        let updateDate = new Date();
-    
-        for(let i=0;i<insts.length;i++) {
-            console.log(`[updater] ${insts[i]}:`);
-    
-            for(let kurs=1;kurs<=6;kurs++) {
-                inst_id  = insts[i];
-                groups   = undefined; // Очищаем массив групп
-    
-                try {
-                    groups = await groupsParser(inst_id, kurs); // Парсим все группы с сайта
-                } catch (err) {
-                    console.log(`[updater] [!] Не удалось для ${inst_id}, ${kurs} курс`);
-                }
-                    
-                if(!groups || !groups.length) continue;
-    
-                for(let g=0;g<groups.length;g++) {
-                    group  = groups[g];
-                    parser = new Parser(inst_id, kurs, group);
-                    days   = undefined; // Очистка
-    
-                    try {
-                        days = await parser.parseSchedule(); // Парсим расписание группы с сайта
-                    } catch (err) {
-                        console.log(`[updater] [!] Не удалось для ${inst_id} ${kurs} курс, группа ${group}!`);
-                    }
-    
-                    if(!days) continue;
-    
-                    // console.log(`[updater] [+] ${inst_id}, ${kurs}, ${group}`); // Нужно скорее для дебага
-    
-                    // Обновляем расписание. Если такой группы нет, она создастся автоматически
-                    bulk.find({ group, inst_id }).upsert().updateOne({ $set: { days, updateDate } });
-                }
-            }
-        }
 
-        // Отправляем изменения в БД
-        await bulk.execute().then(() => console.log(`[updater] Расписания обновлены!`), console.log);
+        // Преобразует массив из строк в массив из обещаний, которые потом одновременно исполняются.
+        await Promise.all(groups.map((groupName) => async function () {
+            let schedule = await APIConvertor.ofo(groupName, ugod, sem);
+
+            if(!schedule || !schedule.isok) return console.log(`[updater] [-] Не удалось для ${groupName}`);
+
+            bulk.find({ group: groupName }).upsert().updateOne({ $set: { data: schedule.data, updateDate: now } });
+            
+            console.log(`[updater] [+] ${groupName}`);
+        }())).then(async () => {
+            await bulk.execute().then(() => console.log(`[updater] Расписания обновлены!`), console.log); // Отправляем изменения в БД
+        });
     }
 
     async updateTeacherSchedules() {
@@ -93,34 +74,32 @@ export default class UpdaterTimer extends Timer {
         let updateDate = new Date(); // Дата обновления (сейчас)
     
         schedules.forEach((group) => {
-            if(!group.days || group.days.length == 0) return; // Если у группы нет пар, значит пропускаем её
+            if(!group.data || group.data.length == 0) return; // Если у группы нет пар, значит пропускаем её
     
-            group.days.forEach((day) => {
-                day.daySchedule.forEach((lesson) => {
-                    if(lesson.teacher == "Не назначен") return;
-    
-                    if(!teachersSchedule[lesson.teacher!]) teachersSchedule[lesson.teacher!] = []; // Создаём для преподавателя массив его дней, если этого массива нет
-                    
-                    // Переменная содержащая инфу о паре
-                    let out:ITeacherLesson = {   
-                        group: group.group,
-                        number: lesson.number!,
-                        time: lesson.time!,
-                        name: lesson.name!,
-                        paraType: lesson.paraType!,
-                        auditory: lesson.auditory!,
-                    };
-    
-                    if(lesson.remark) out.remark = lesson.remark;
-                    if(lesson.percent) out.percent = lesson.percent;
-                    if(lesson.period) out.period = lesson.period;
-                    if(lesson.flow) out.flow = lesson.flow;
-                    
-                    // Тут добавляем сам день, а если он уже есть, то вставляем в него пару
-                    if(!teachersSchedule[lesson.teacher!].find(elm => elm.daynum == day.daynum && elm.even == day.even))
-                        teachersSchedule[lesson.teacher!].push({daynum: day.daynum, even: day.even, daySchedule: [out]});
-                    else teachersSchedule[lesson.teacher!].find(elm => elm.daynum == day.daynum && elm.even == day.even)!.daySchedule.push(out);
-                });
+            group.data.forEach((lesson) => {
+                if(lesson.teacher == "Не назначен") return;
+
+                if(!teachersSchedule[lesson.teacher!]) teachersSchedule[lesson.teacher!] = []; // Создаём для преподавателя массив его дней, если этого массива нет
+                
+                // Переменная содержащая инфу о паре
+                let out:ITeacherLesson = {
+                    group: group.group,
+                    number: lesson.pair!,
+                    time: Group.lessonsTime[lesson.pair!]!,
+                    name: lesson.disc?.disc_name!,
+                    paraType: Group.lessonsTypes[lesson.kindofnagr?.kindofnagr_name!]!,
+                    auditory: lesson.classroom!,
+                };
+
+                if(lesson.comment) out.remark = lesson.comment;
+                if(lesson.persent_of_gr != 100) out.percent = `${lesson.persent_of_gr}%`;
+                if(lesson.ned_from != 1 || lesson.ned_to != 18) out.period = `c ${lesson.ned_from} по ${lesson.ned_to} неделю`;
+                if(lesson.ispotok) out.flow = lesson.ispotok;
+                
+                // Тут добавляем сам день, а если он уже есть, то вставляем в него пару
+                if(!teachersSchedule[lesson.teacher!].find(elm => elm.daynum == lesson.dayofweek?.dayofweek_id && elm.even == (lesson.nedtype?.nedtype_id == 2)))
+                    teachersSchedule[lesson.teacher!].push({daynum: lesson.dayofweek?.dayofweek_id!, even: (lesson.nedtype?.nedtype_id == 2), daySchedule: [out]});
+                else teachersSchedule[lesson.teacher!].find(elm => elm.daynum == lesson.dayofweek?.dayofweek_id && elm.even == (lesson.nedtype?.nedtype_id == 2))!.daySchedule.push(out);
             });
         });
 
