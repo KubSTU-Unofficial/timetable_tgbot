@@ -2,7 +2,7 @@ import { CallbackQuery } from "node-telegram-bot-api";
 import Query from "../structures/Query.js";
 import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
-import APIConvertor from "../lib/APIConvertor.js";
+import ScheduleModel from "../models/ScheduleModel.js";
 
 interface KeyboardButton {
     text: string,
@@ -25,27 +25,12 @@ export default class GroupQuery extends Query {
     
         db.kurs = +query.data!.slice(14,query.data!.length);
     
-        let text: string     = query.message!.text;
-        let now: Date        = new Date();
-        let ugod             = now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1);
-        let groupDate        = (now.getFullYear() - db.kurs + 1 - ( now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-        let resp             = await APIConvertor.ofoGroupsList(ugod, db.inst_id!, db.kurs!);
-
-        if(!resp || !resp.isok) {
-            Cache.bot.editMessageText(text.split("\n\n").slice(0,text.split("\n\n").length-1).join("\n\n") + "\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer", {
-                chat_id: query.message.chat.id,
-                message_id: query.message.message_id,
-            });
-
-            console.log(resp?.error_message);
-
-            return;
-        }
-
-        let groups:string[]               = resp.data.map(elm => elm.name);
-        let keyboard: KeyboardButton[][]  = [];
-        let buffer: KeyboardButton[]      = [];
-
+        let text: string  = query.message!.text;
+        let now: Date     = new Date();
+        let groupDate     = (now.getFullYear() - db.kurs + 1 - ( now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
+        let schedules     = await ScheduleModel.find({inst_id: db.inst_id!, group: { $regex: `^${groupDate}-`}}).exec();
+        let groups        = schedules.map(s => s.group);
+        
         if(!groups || groups!.length == 0) {
             Cache.bot.editMessageText(text.split("\n\n").slice(0,text.split("\n\n").length-1).join("\n\n") + "\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer", {
                 chat_id: query.message.chat.id,
@@ -54,6 +39,9 @@ export default class GroupQuery extends Query {
 
             return;
         }
+
+        let keyboard: KeyboardButton[][]  = [];
+        let buffer: KeyboardButton[]      = [];
 
         for(let i = 0;i<groups.length;i++) {
             if(i%4==0 && i!=0) {

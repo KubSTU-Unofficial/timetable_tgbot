@@ -48,18 +48,18 @@ export default class UpdaterTimer extends Timer {
 
         if(!resp || !resp.isok) return console.log("[updater] Ошибка!", resp?.error_message);
 
-        let groups = resp.data.map(g => g.name);
+        let groups = resp.data.map(g => ({name: g.name, inst_id: g.inst_id}));
         let bulk = ScheduleModel.collection.initializeOrderedBulkOp();
 
         // Преобразует массив из строк в массив из обещаний, которые потом одновременно исполняются.
-        await Promise.all(groups.map((groupName) => async function () {
-            let schedule = await APIConvertor.ofo(groupName, ugod, sem);
+        await Promise.all(groups.map((group) => async function () {
+            let schedule = await APIConvertor.ofo(group.name, ugod, sem);
 
-            if(!schedule || !schedule.isok) return console.log(`[updater] [-] Не удалось для ${groupName}`);
+            if(!schedule || !schedule.isok) return console.log(`[updater] [-] Не удалось для ${group.name}`);
 
-            bulk.find({ group: groupName }).upsert().updateOne({ $set: { data: schedule.data, updateDate: now } });
+            bulk.find({ group: group.name, inst_id: group.inst_id }).upsert().updateOne({ $set: { data: schedule.data, updateDate: now } });
             
-            console.log(`[updater] [+] ${groupName}`);
+            console.log(`[updater] [+] ${group.name}`);
         }())).then(async () => {
             await bulk.execute().then(() => console.log(`[updater] Расписания обновлены!`), console.log); // Отправляем изменения в БД
         });

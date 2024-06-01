@@ -5,6 +5,10 @@ const schema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    inst_id: {
+        type: Number,
+        required: true,
+    },
     updateDate: {
         type: Date,
         required: true,
