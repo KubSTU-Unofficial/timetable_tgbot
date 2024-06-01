@@ -51,14 +51,7 @@ export default class Group {
         .sort((a,b) => a.pair - b.pair);
     }
 
-
-    async getTextSchedule(date = new Date(), opts:{showDate?: boolean} = {}) {
-        let day      = date.getDay();
-        let week     = date.getWeek()%2 == 0;
-        let lessons  = await this.getDayRawSchedule(day, week);
-
-        if(!lessons) return "<b>Во время получения расписания произошла ошибка!</b>\n<i>Возможно стоит обратиться в <a href=\"https://t.me/Elektroplayer\">поддержку</a></i>";
-
+    formatSchedule(lessons:IOFORespPara[], date = new Date()) {
         let out      = "";
         let para     = "";
         let weekNum  = date ? weekNumber(date) : null;
@@ -78,7 +71,19 @@ export default class Group {
             para = "";
         });
 
-        return `<b>${days[day]} / ${week ? "Чётная" : "Нечётная"} неделя` + (opts.showDate ? ` / ${date.stringDate()}` : "") + `</b>` + (!out ? "\nПар нет! Передохни:з" : out);
+        return out;
+    }
+
+    async getTextSchedule(date = new Date(), opts:{showDate?: boolean} = {}) {
+        let day      = date.getDay();
+        let week     = date.getWeek()%2 == 0;
+        let lessons  = await this.getDayRawSchedule(day, week);
+
+        if(!lessons) return "<b>Во время получения расписания произошла ошибка!</b>\n<i>Возможно стоит обратиться в <a href=\"https://t.me/Elektroplayer\">поддержку</a></i>";
+
+        let text = this.formatSchedule(lessons, date);
+
+        return `<b>${days[day]} / ${week ? "Чётная" : "Нечётная"} неделя` + (opts.showDate ? ` / ${date.stringDate()}` : "") + `</b>` + (!text ? "\nПар нет! Передохни:з" : text);
     }
 
     async getTextFullSchedule(week: boolean, startDate: Date) {
