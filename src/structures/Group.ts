@@ -8,6 +8,10 @@ import APIConvertor from "../lib/APIConvertor.js";
 
 export default class Group {
     kurs: number;
+    cachedFullRawSchedule?: {
+        data: IOFORespPara[],
+        updateDate: Date
+    };
     
     static lessonsTime: string[] = ["what?", "8:00 - 9:30", "9:40 - 11:10", "11:20 - 12:50", "13:20 - 14:50", "15:00 - 16:30", "16:40 - 18:10", "18:20 - 19:50"];
     static lessonsTypes: {[key:string]: string} = {
@@ -30,16 +34,24 @@ export default class Group {
      */
     async getFullRawSchedule() {
         let date  = new Date();
+
+        if(this.cachedFullRawSchedule && date.valueOf() - this.cachedFullRawSchedule.updateDate.valueOf() < 1000 * 60 * 60 * 4) return this.cachedFullRawSchedule.data;
+        
         let ugod  = date.getFullYear() - (date.getMonth() >= 6 ? 0 : 1);
         let sem   = date.getMonth() > 5 ? 1 : 2;
 
         let resp = await APIConvertor.ofo(this.name, ugod, sem);
 
         if(!resp || !resp.isok) {
+            // Не кешируем ответ базы данных. Частые обращения к ней не страшны, а вот информация может быть немного устаревшей
             let dbResponse = await Schedules.findOne({group: this.name}).exec();
 
             return dbResponse?.data as IOFORespPara[] | undefined;
-        } else return resp.data;
+        } else {
+            this.cachedFullRawSchedule = { data: resp.data, updateDate: date };
+
+            return resp.data;
+        }
     }
 
     async getDayRawSchedule(day = new Date().getDay(), week = (new Date().getWeek()%2==0)) {
