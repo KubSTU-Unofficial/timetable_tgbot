@@ -39,7 +39,7 @@ export default class NotificationsTimer extends Timer {
 
             if (todayScheduleArray.length == 0) {
                 if (this.time != 9) return; // ...расписания на сегодня нет, а время уже не 9
-            } else if (this.time != +(Group.lessonsTypes[todayScheduleArray[todayScheduleArray.length - 1].pair]).split(":")[1].split(" - ")[1]) return; // ...ещё не время (отправляем только, после пар)
+            } else if (this.time != +(Group.lessonsTime[todayScheduleArray[todayScheduleArray.length - 1].pair]).split(":")[1].split(" - ")[1]) return; // ...ещё не время (отправляем только, после пар)
 
             console.log(`[notify] ${user.id}, ${user.group?.name}`);
 
