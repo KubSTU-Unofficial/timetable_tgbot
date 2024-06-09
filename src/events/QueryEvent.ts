@@ -12,12 +12,9 @@ export default class QueryEvent extends Event {
 
         if (!user.scene) user.scene = Cache.scenes.find((s) => s.name == "main");
 
-        let execQuery = user.scene!.queries.find((q) => q.name.some((n) => query.data?.startsWith(n)) );
+        let execQuery = user.scene!.queries.find((q) => q.name.some((n) => query.data?.startsWith(n)));
 
-        if (!execQuery) Cache.bot.sendMessage(
-            query.message!.chat.id,
-            "Похоже эта кнопка себя исчерпала"
-        );
+        if (!execQuery) Cache.bot.sendMessage(query.message!.chat.id, "Похоже эта кнопка себя исчерпала...");
         else execQuery.exec(user, query);
     }
 }

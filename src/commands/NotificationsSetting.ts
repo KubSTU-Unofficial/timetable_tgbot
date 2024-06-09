@@ -24,7 +24,7 @@ export default class TodayCommand extends Command {
         user.scene = Cache.scenes.find(s => s.name == "main");
 
         Cache.bot.sendMessage(msg.chat.id,
-            condition ? `Напоминания включены.\n\nТеперь бот каждый день (кроме субботы) через час после пар будете автоматически писать вам расписание на завтра.` : `Напоминания выключены.`,
+            condition ? `Напоминания включены.\n\nТеперь бот каждый день (кроме субботы) через час после пар будете автоматически писать тебе расписание на завтра.` : `Напоминания выключены.`,
             {
                 reply_markup: {
                     keyboard: user.getMainKeyboard(),

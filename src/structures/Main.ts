@@ -5,7 +5,7 @@ import Cache from "../lib/Cache.js";
 import Timer from "./Timer.js";
 
 export default class Main {
-    scenesNames = ["main", "settings", "teachers", "loginpassword"];
+    scenesNames = ["main", "settings", "teachers"];
 
     run() {
         this.initEvents();

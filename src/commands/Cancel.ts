@@ -5,7 +5,7 @@ import Cache from "../lib/Cache.js";
 
 export default class TodayCommand extends Command {
     name = { buttons: { title: "Отмена", emoji: "🛑" } };
-    sceneName = ["settings", "loginpassword", "teachers"];
+    sceneName = ["settings", "teachers"];
 
     async exec(user: User, msg: Message): Promise<void> {
         user.setScene("main");

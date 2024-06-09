@@ -74,7 +74,7 @@ export default class TodayCommand extends Command {
         let schedule = await user.group!.getFullRawSchedule();
         let dict: { [key:string]: string } = {};
 
-        let options:SendMessageOptions = {
+        let options: SendMessageOptions = {
             parse_mode: "HTML",
             reply_markup: {
                 keyboard: user.getMainKeyboard(),
@@ -102,6 +102,7 @@ export default class TodayCommand extends Command {
         let schedule1 = this.getTextFullSchedule(date.getWeek()%2==0, teacherSchedule as ITeacherSchedule);
         let schedule2 = this.getTextFullSchedule(date.getWeek()%2==1, teacherSchedule as ITeacherSchedule);
 
+        // TODO: Сделай уже с этим что-нибудь!
         if((schedule1 && schedule1?.length > 4096) || (schedule2 && schedule2?.length > 4096)) {
             await Cache.bot.sendMessage(msg.chat.id, `<b>Извини, у этого преподавателя слишком большое расписание</b>\n\nЯ уже работаю над этой проблемой`, options);
 

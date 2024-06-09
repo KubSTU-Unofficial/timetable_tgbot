@@ -35,7 +35,7 @@ export default class NotificationsTimer extends Timer {
             let todayScheduleArray = await user.group.getDayRawSchedule(dateToday.getDay(), dateToday.getWeek() % 2 == 0); // Смотрим сегодняшнее расписание
 
             // Забиваем если
-            if (todayScheduleArray == null) return; // ...расписания нет вообще.
+            if (!todayScheduleArray) return; // ...расписания нет вообще.
 
             if (todayScheduleArray.length == 0) {
                 if (this.time != 9) return; // ...расписания на сегодня нет, а время уже не 9

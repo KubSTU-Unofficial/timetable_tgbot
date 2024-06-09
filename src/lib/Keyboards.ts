@@ -105,29 +105,9 @@ export function selectingDayKeyboard(date: Date = new Date()):KeyboardButton[][]
     return out;
 }
 
-export function settingsKeyboard(notifications: boolean):KeyboardButton[][] {
-
-    return [
-        [
-            {
-                text: notifications ? "🔕 Выключить напоминания" : "🔔 Включить напоминания"
-            }
-        ],[
-            {
-                text: "⚙️ Перенастроить бота"
-            }
-        ],[
-            {
-                text: "🛑 Отмена"
-            }
-        ]
-    ];
-}
-
 export default {
     instKeyboard,
     kursKeyboard,
     mainKeyboard,
-    selectingDayKeyboard,
-    settingsKeyboard
+    selectingDayKeyboard
 };

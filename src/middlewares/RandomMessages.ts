@@ -9,11 +9,6 @@ class SponsorMessagesMiddleware extends Middleware {
     users:{id: number, count: number}[] = [];
 
     messages = [
-        "Нравится бот? Скинь пару рублей со стипендии на карту)\n\nИнфа в /about",
-        "Нравится? Я старался)\n\nЕсли хочешь меня обрадовать, можешь помочь оплачивать хост. Напиши команду /about",
-
-        "Информация о новостях и отключениях находится в @kubstu_schedule_news",
-
         "Про ошибки/предложения не стесняйся писать мне в ЛС: @Elektroplayer",
         "Если бот перестал работать, это повод написать мне в ЛС: @Elektroplayer",
 
@@ -25,9 +20,6 @@ class SponsorMessagesMiddleware extends Middleware {
         "Иногда нужно смотреть шире, чем обычно.\n\n/showall покажет расписание полностью",
         "Не можешь запомнить имена преподавателей?\n\nВыведи список преподавателей по команде /teachers",
         "Не забывай про экзамены!\n\nПосмотри дату ближайшего экзамена по команде /exams"
-
-
-        // "<b>ВНИМАНИЕ! ЧЕРЕЗ НЕДЕЛЮ БОТ ЗАКРЫВАЕТСЯ!</b>\n\nШутка) Но не очень приятная. Я много плачу за хост, поэтому чтобы такого реально не произошло, в /start можешь узнать, как меня можно поддержать."
     ];
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -42,15 +34,11 @@ class SponsorMessagesMiddleware extends Middleware {
                 count: 1
             });
         } else if(thisUser.count > 5) {
-            let num = Math.floor( Math.random() * this.messages.length );
+            let num = Math.floor(Math.random() * this.messages.length);
 
             console.log(`[message] [+] доп сообщение ${num}.`);
 
-            Cache.bot.sendMessage(
-                msg.chat.id,
-                this.messages[num],
-                { parse_mode: "HTML" }
-            );
+            Cache.bot.sendMessage(msg.chat.id, this.messages[num], { parse_mode: "HTML" });
 
             thisUser.count = 1;
         } else thisUser.count++;
