@@ -112,16 +112,18 @@ export default class Group {
         if(schedule == null || schedule == undefined) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
 
         out += `<u><b>${week ? "ЧЁТНАЯ" : "НЕЧЁТНАЯ"} НЕДЕЛЯ${num ? ` | №${num}` : ""}:</b></u>\n`;
+        
+        if(!schedule.length) return out + "Здесь ничего нет...";
+
         let currWeekLessons:IOFORespPara[] = schedule.filter(elm => elm.nedtype.nedtype_id == (week ? 2 : 1));
 
-        // TODO: Если на неделе нет пар, что будет?
         for(let i = 0;i<7;i++) {
             let curDayLessons = currWeekLessons.filter(p => p.dayofweek.dayofweek_id == i);
 
             startDate.setDate(startDate.getDate() + 1);
 
             if(curDayLessons.length) {
-                out += `\n<b>${days[i]} | ${startDate.stringDate()}</b>\n`;
+                out += `\n<b>${days[i]} | ${startDate.stringDate()}, ${Group.lessonsTime[curDayLessons[0].pair].split(" - ")[0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length-1].pair].split(" - ")[1]}</b>\n`;
 
                 curDayLessons.forEach(lesson => {
                     out += `  ${lesson.pair}. ${lesson.disc.disc_name} [${dict[lesson.kindofnagr.kindofnagr_name] ?? lesson.kindofnagr.kindofnagr_name}] (${lesson.classroom})\n`;
@@ -178,26 +180,6 @@ export default class Group {
 
         return out ? ("<b>СОБЫТИЯ:</b>" + out) : null;
     }
-
-
-    // async updateScheduleFromSite() {
-    //     // TODO: Модель изменилась
-    //     let F = (days: IDay[], updateDate = new Date()) => {return {updateDate, days};};
-
-    //     try {
-    //         let days = await this.parser.parseSchedule();
-
-    //         await Schedules.findOneAndUpdate({ group: this.name, inst_id: this.instId }, {
-    //             days,
-    //             updateDate: new Date()
-    //         }, { upsert: true });
-
-    //         return F(days);
-    //     } catch (error) {
-    //         return null;
-    //     }
-    // }
-
     
     async getToken():Promise<string> {
         let groupInfo = await Groups.findOne({group: this.name, inst_id: this.instId}).exec();
