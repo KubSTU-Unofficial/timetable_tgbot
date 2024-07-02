@@ -26,8 +26,6 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if(!user.group) return;
 
-        
-
         let schedule = await user.group.getFullRawSchedule();
         let teachers: string[] = [];
 

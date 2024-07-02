@@ -51,7 +51,18 @@ export async function ofo(gr:string, ugod: string | number = new Date().getFullY
     let resp = await fetch(`${process.env.KUBSTU_API}/timetable/ofo?gr=${gr}&ugod=${ugod}&semestr=${sem}`, opts)
     .catch(console.log);
 
-    if(resp) return await resp.json() as IOFOResp;
+    if(resp) {
+        let json:IOFOResp = await resp.json() as IOFOResp;
+
+        json.data.map(elm => {
+            if(!elm.teacher.trim()) elm.teacher = 'Не назначен';
+            if(!elm.classroom.trim()) elm.teacher = 'Не назначена';
+
+            return elm;
+        });
+
+        return json;
+    }
     else return undefined;
 }
 
