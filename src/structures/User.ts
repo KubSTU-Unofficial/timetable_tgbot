@@ -1,11 +1,13 @@
+import BaseUser from "../shared/structures/User.js";
 import Scene from "./Scene.js";
 import Group from "./Group.js";
-import Users from "../models/UsersModel.js";
+import Users from "../shared/models/UsersModel.js";
 import Cache from "../lib/Cache.js";
 import { KeyboardButton } from "node-telegram-bot-api";
 
-export default class User {
+export default class User extends BaseUser {
     scene?: Scene;
+
     group?: Group;
     notifications: boolean = false;
     emoji: boolean = true;
@@ -21,8 +23,6 @@ export default class User {
         inst_id?: number,
         kurs?: number
     }[] = [];
-
-    constructor(public id:number) {}
 
     /**
      * Инициализация

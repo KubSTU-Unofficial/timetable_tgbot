@@ -2,8 +2,8 @@ import { Message, SendMessageOptions } from "node-telegram-bot-api";
 import Command from "../structures/Command.js";
 import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
-import TeacherScheduleModel from "../models/TeacherScheduleModel.js";
-import { weekNumber, days as daysWeek } from "../lib/Utils.js";
+import TeacherScheduleModel from "../shared/models/TeacherScheduleModel.js";
+import { weekNumber, days as daysWeek } from "../shared/lib/Utils.js";
 
 interface ITeacherSchedule {
     days: ITeacherDay[],

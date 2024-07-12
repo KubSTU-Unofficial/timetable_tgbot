@@ -1,8 +1,8 @@
 import Timer from "../structures/Timer.js";
 import { CronJob } from "cron";
-import ScheduleModel from "../models/ScheduleModel.js";
-import APIConvertor from "../lib/APIConvertor.js";
-import TeacherScheduleModel from '../models/TeacherScheduleModel.js';
+import ScheduleModel from "../shared/models/ScheduleModel.js";
+import APIConvertor from "../shared/lib/APIConvertor.js";
+import TeacherScheduleModel from '../shared/models/TeacherScheduleModel.js';
 import Group from '../structures/Group.js';
 
 export default class UpdaterTimer extends Timer {

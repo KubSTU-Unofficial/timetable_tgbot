@@ -1,5 +1,5 @@
 import Timer from "../structures/Timer.js";
-import Users from "../models/UsersModel.js";
+import Users from "../shared/models/UsersModel.js";
 import Cache from "../lib/Cache.js";
 import Group from "../structures/Group.js";
 import { CronJob } from "cron";

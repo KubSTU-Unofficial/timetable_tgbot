@@ -3,7 +3,7 @@ import Command from "../structures/Command.js";
 import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
 import SponsorMessagesMiddleware from "../middlewares/RandomMessages.js";
-import { days } from "../lib/Utils.js";
+import { days } from "../shared/lib/Utils.js";
 
 export default class NearestCommand extends Command {
     name = {
