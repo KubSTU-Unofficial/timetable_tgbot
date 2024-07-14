@@ -29,18 +29,17 @@ export default class NearestCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if(!user.group) return;
 
-        let date = new Date();
         let fullRawSchedule = await user.group.getFullRawSchedule();
 
         if(!fullRawSchedule || !fullRawSchedule.length) return this.errorMessage(msg);
 
-        let day:number = 0, week:boolean = true, schedule:IOFORespPara[] = [], eventsText: string | null = null;
+        let date = new Date(), day: number = 0, week: boolean = true, schedule: IOFORespPara[] = [], eventsText: string | null = null;
 
-        for(let i = 0;i <= 14;i++) {
+        for(let i = 0; i <= 14; i++) {
             day         = date.getDay();
             week        = date.getWeek()%2 == 0;
             schedule    = fullRawSchedule.filter(p => p.nedtype.nedtype_id == (week ? 2 : 1) && p.dayofweek.dayofweek_id == day);
-            eventsText  = await user.group.getTextEvents();
+            eventsText  = await user.group.getTextEvents(date);
 
             if(schedule.length || eventsText) break;
             else date.setDate(date.getDate() + 1);
@@ -49,7 +48,7 @@ export default class NearestCommand extends Command {
         if(!schedule.length && !eventsText) return this.errorMessage(msg);
 
         let textSchedule = user.group.formatSchedule(schedule, date);
-        let text = `<b>${days[day]} / ${week ? "Чётная" : "Нечётная"} неделя</b>` +
+        let text = `<b>${days[day]} / ${week ? "Чётная" : "Нечётная"} неделя / ${date.stringDate()}</b>` +
         (!textSchedule ? "\nПар нет! Передохни:з" : textSchedule) +
         (eventsText ? `\n\n${eventsText}` : "");
         
