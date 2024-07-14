@@ -23,6 +23,19 @@ class Cache {
             return newUser;
         }
     }
+
+    getGroup(name: string, instId: number) {
+        let group = this.groups.find((u) => u.name == name);
+
+        if (group) return group;
+        else {
+            let newGroup = new Group(name, instId);
+
+            this.groups.push(newGroup);
+
+            return newGroup;
+        }
+    }
 }
 
 export default new Cache();

@@ -20,7 +20,11 @@ export default class TodayCommand extends Command {
             `Разработано Управлением информатизации и студентом кафедры информатики и вычислительной техники института КСиИБ КубГТУ 💙`,
             {
                 disable_web_page_preview: true,
-                parse_mode: "HTML"
+                parse_mode: "HTML",
+                reply_markup: {
+                    keyboard: user.getMainKeyboard(),
+                    resize_keyboard: true
+                }
             }
         );
     }

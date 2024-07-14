@@ -34,5 +34,5 @@ export default abstract class Command {
         return arr;
     }
 
-    abstract exec(user: User, msg: Message): Promise<void>;
+    abstract exec(user: User, msg: Message): Promise<unknown>;
 }

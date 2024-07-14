@@ -2,30 +2,21 @@ import { Message } from "node-telegram-bot-api";
 import Command from "../structures/Command.js";
 import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
-import Users from "../shared/models/UsersModel.js";
+import GroupTestMiddleware from "../middlewares/GroupTestMiddleware.js";
+// import Users from "../shared/models/UsersModel.js";
 
-export default class TodayCommand extends Command {
+export default class SettingsCommand extends Command {
     name = {
         buttons: { title: "Настройки", emoji: "⚙️" },
         command: "settings"
     };
 
     sceneName = ["main"];
+    middlewares = [GroupTestMiddleware];
 
-    async exec(user: User, msg: Message): Promise<void> {
-        if (msg.chat.type !== "private") {
-            Cache.bot.sendMessage(msg.chat.id, "Настройки доступны только в личных сообщениях.");
-
-            return;
-        }
-
-        let userData = await Users.findOne({userId: user.id}).exec();
-
-        if (!userData) {
-            Cache.bot.sendMessage(msg.chat.id, "Сначала введи свои данные! /start");
-
-            return;
-        }
+    async exec(user: User, msg: Message): Promise<unknown> {
+        if(!user.group) return;
+        if (msg.chat.type !== "private") return Cache.bot.sendMessage(msg.chat.id, "Настройки доступны только в личных сообщениях.");
 
         user.setScene("settings");
 

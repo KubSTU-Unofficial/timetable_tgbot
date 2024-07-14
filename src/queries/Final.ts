@@ -18,12 +18,9 @@ export default class FinalQuery extends Query {
         }
         
         let group = query.data!.slice(15,query.data!.length);
-        user.updateData({
-            instId: db.inst_id!,
-            group
-        });
 
-        user.scene = Cache.scenes.find(s => s.name == "main");
+        user.updateData({ inst_id: db.inst_id!, group });
+        user.setScene("main");
         user.dataBuffer = user.dataBuffer.slice(user.dataBuffer.indexOf(db), 1);
         
         Cache.bot.editMessageText(

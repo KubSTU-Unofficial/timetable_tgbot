@@ -4,6 +4,7 @@ import User from "../structures/User.js";
 import Cache from "../lib/Cache.js";
 import SponsorMessagesMiddleware from "../middlewares/RandomMessages.js";
 import { days } from "../shared/lib/Utils.js";
+import GroupTestMiddleware from "../middlewares/GroupTestMiddleware.js";
 
 export default class NearestCommand extends Command {
     name = {
@@ -12,7 +13,7 @@ export default class NearestCommand extends Command {
     };
     
     sceneName = ["main"];
-    middlewares = [SponsorMessagesMiddleware];
+    middlewares = [SponsorMessagesMiddleware, GroupTestMiddleware];
 
     async errorMessage(msg: Message) {
         Cache.bot.sendMessage(msg.chat.id, "<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>", {
