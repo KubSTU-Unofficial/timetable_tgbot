@@ -1,20 +1,20 @@
-import { Message, SendMessageOptions } from "node-telegram-bot-api";
-import Command from "../structures/Command.js";
-import User from "../structures/User.js";
-import Cache from "../lib/Cache.js";
-import GroupTestMiddleware from "../middlewares/GroupTestMiddleware.js";
+import { Message, SendMessageOptions } from 'node-telegram-bot-api';
+import Command from '../structures/Command.js';
+import User from '../structures/User.js';
+import Cache from '../lib/Cache.js';
+import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
 
 export default class TodayCommand extends Command {
-    name = { command: "showall" };
-    sceneName = ["main"];
+    name = { command: 'showall' };
+    sceneName = ['main'];
     middlewares = [GroupTestMiddleware];
 
     async exec(user: User, msg: Message): Promise<void> {
-        if(!user.group) return;
+        if (!user.group) return;
 
         let date = new Date();
         let curMonday = new Date();
-        
+
         curMonday.setHours(0, 0, 0, 0);
         curMonday.setDate(curMonday.getDate() - (curMonday.getDay() || 7) + 1);
 
@@ -22,19 +22,19 @@ export default class TodayCommand extends Command {
 
         nextMonday.setDate(nextMonday.getDate() + 7);
 
-        let schedule1 = await user.group.getTextFullSchedule(date.getWeek()%2==0, curMonday);
-        let schedule2 = await user.group.getTextFullSchedule(date.getWeek()%2==1, nextMonday);
+        let schedule1 = await user.group.getTextFullSchedule(date.getWeek() % 2 == 0, curMonday);
+        let schedule2 = await user.group.getTextFullSchedule(date.getWeek() % 2 == 1, nextMonday);
 
         let opt: SendMessageOptions = {
-            parse_mode: "HTML",
+            parse_mode: 'HTML',
             reply_markup: {
-                remove_keyboard: msg.chat.type !== "private"
+                remove_keyboard: msg.chat.type !== 'private',
             },
-            disable_web_page_preview: true
+            disable_web_page_preview: true,
         };
 
-        if(!schedule1 || !schedule2) {
-            Cache.bot.sendMessage(msg.chat.id, "<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>", opt);
+        if (!schedule1 || !schedule2) {
+            Cache.bot.sendMessage(msg.chat.id, '<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>', opt);
 
             return;
         } else {

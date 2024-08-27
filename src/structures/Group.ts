@@ -64,10 +64,8 @@ export default class Group extends BaseGroup {
 
         let currWeekLessons: IRespOFOPara[] = schedule.filter((elm) => elm.nedtype.nedtype_id == (week ? 2 : 1));
 
-        for (let i = 0; i < 7; i++) {
+        for (let i = 1; i <= 7; i++) {
             let curDayLessons = currWeekLessons.filter((p) => p.dayofweek.dayofweek_id == i);
-
-            startDate.setDate(startDate.getDate() + 1);
 
             if (curDayLessons.length) {
                 out += `\n<b>${days[i]} | ${startDate.stringDate()}, ${BaseGroup.lessonsTime[curDayLessons[0].pair].split(' - ')[0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].pair].split(' - ')[1]}</b>\n`;
@@ -76,6 +74,8 @@ export default class Group extends BaseGroup {
                     out += `  ${lesson.pair}. ${lesson.disc.disc_name} [${dict[lesson.kindofnagr.kindofnagr_name] ?? lesson.kindofnagr.kindofnagr_name}] (${lesson.classroom})\n`;
                 });
             }
+
+            startDate.setDate(startDate.getDate() + 1);
         }
 
         return out;
