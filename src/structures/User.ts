@@ -1,9 +1,9 @@
-import BaseUser from "../shared/structures/User.js";
-import Scene from "./Scene.js";
-import Group from "./Group.js";
-import Users from "../shared/models/TgUsersModel.js";
-import Cache from "../lib/Cache.js";
-import { KeyboardButton } from "node-telegram-bot-api";
+import BaseUser from '../shared/structures/User.js';
+import Scene from './Scene.js';
+import Group from './Group.js';
+import Users from '../shared/models/TgUsersModel.js';
+import Cache from '../lib/Cache.js';
+import { KeyboardButton } from 'node-telegram-bot-api';
 
 // TODO: Исправить возвраты функций
 
@@ -21,9 +21,9 @@ export default class User extends BaseUser {
      * Используется для временного хранения данных при настройке
      */
     dataBuffer: {
-        id: number,
-        inst_id?: number,
-        kurs?: number
+        id: number;
+        inst_id?: number;
+        kurs?: number;
     }[] = [];
 
     /**
@@ -32,7 +32,7 @@ export default class User extends BaseUser {
     async init() {
         let userData = await Users.findOne({ userId: this.id }).exec();
 
-        if(userData?.inst_id && userData?.group) {
+        if (userData?.inst_id && userData?.group) {
             this.group = Cache.getGroup(userData.group, userData.inst_id);
             this.notifications = userData?.notifications ?? false;
             this.emoji = userData?.emoji ?? true;
@@ -45,11 +45,18 @@ export default class User extends BaseUser {
     /**
      * Обновление данных в БД и в классе
      */
-    async updateData(opt: { inst_id?: number, group?: string, notifications?: boolean, emoji?: boolean, showSettings?: boolean, showTeachers?: boolean }) {
+    async updateData(opt: {
+        inst_id?: number;
+        group?: string;
+        notifications?: boolean;
+        emoji?: boolean;
+        showSettings?: boolean;
+        showTeachers?: boolean;
+    }) {
         await Users.findOneAndUpdate({ userId: this.id }, opt, { upsert: true });
 
         if (opt.inst_id != undefined && opt.group != undefined) this.group = Cache.getGroup(opt.group, opt.inst_id); // this.setGroup(opt.group, opt.instId);
-        
+
         if (opt.notifications != undefined) this.notifications = opt.notifications;
         if (opt.emoji != undefined) this.emoji = opt.emoji;
         if (opt.showSettings != undefined) this.showSettings = opt.showSettings;
@@ -57,18 +64,18 @@ export default class User extends BaseUser {
     }
 
     setScene(sceneName: string) {
-        this.scene = Cache.scenes.find(x => x.name == sceneName);
+        this.scene = Cache.scenes.find((x) => x.name == sceneName);
     }
 
     /**
      * Установка токена
      */
-    async setToken(token:string) {
+    async setToken(token: string) {
         this.token = token;
 
-        let userData = await Users.findOne({userId: this.id}).exec();
+        let userData = await Users.findOne({ userId: this.id }).exec();
 
-        if(userData) {
+        if (userData) {
             userData.token = token;
             userData.save().catch(console.log);
         }
@@ -78,14 +85,14 @@ export default class User extends BaseUser {
      * Удаление пользователя из БД
      */
     async delete() {
-        return Users.findOneAndDelete({userId: this.id});
+        return Users.findOneAndDelete({ userId: this.id });
         // TODO: Сделать удаление из массива Cache.users
     }
 
     async updateLastActivity() {
-        let user = await Users.findOne({userId: this.id}).exec();
+        let user = await Users.findOne({ userId: this.id }).exec();
 
-        if(user) {
+        if (user) {
             user.lastActivity = new Date();
             user.save().catch(console.log);
         }
@@ -94,25 +101,28 @@ export default class User extends BaseUser {
     /**
      * Получение главной клавиатуры
      */
-    getMainKeyboard():KeyboardButton[][] {
+    getMainKeyboard(): KeyboardButton[][] {
         let arr = [
             [
                 {
-                    text: (this.emoji ? "⏺️ " : "") + "Сегодняшнее",
-                },{
-                    text: (this.emoji ? "▶️ " : "") + "Завтрашнее",
-                }
-            ],[
+                    text: (this.emoji ? '⏺️ ' : '') + 'Сегодняшнее',
+                },
                 {
-                    text: (this.emoji ? "⏩ " : "") + "Ближайшее"
-                }, {
-                    text: (this.emoji ? "🔀 " : "") + "Выбрать день",
-                }
-            ]
+                    text: (this.emoji ? '▶️ ' : '') + 'Завтрашнее',
+                },
+            ],
+            [
+                {
+                    text: (this.emoji ? '⏩ ' : '') + 'Ближайшее',
+                },
+                {
+                    text: (this.emoji ? '🔀 ' : '') + 'Выбрать день',
+                },
+            ],
         ];
 
-        if(this.showTeachers) arr.push([{ text: (this.emoji ? "👨‍🏫 " : "") + "Расписания преподавателей" }]);
-        if(this.showSettings) arr.push([{ text: (this.emoji ? "⚙️ " : "") + "Настройки" }]);
+        if (this.showTeachers) arr.push([{ text: (this.emoji ? '👨‍🏫 ' : '') + 'Расписания преподавателей' }]);
+        if (this.showSettings) arr.push([{ text: (this.emoji ? '⚙️ ' : '') + 'Настройки' }]);
 
         return arr;
     }
@@ -120,30 +130,39 @@ export default class User extends BaseUser {
     /**
      * Получение клавиатуры настроек
      */
-    getSettingsKeyboard():KeyboardButton[][] {
+    getSettingsKeyboard(): KeyboardButton[][] {
         return [
             [
                 {
-                    text: this.notifications ? ( (this.emoji ? "🔕 " : "") + "Выключить напоминания") : ((this.emoji ? "🔔 " : "") + "Включить напоминания")
-                },{
-                    text: this.emoji ? ( (this.emoji ? "🙅‍♂️ " : "") + "Выключить эмодзи") : "Включить эмодзи" // Тут нет эмодзи, потому что оно тут в любом случае будет отсутствовать
-                }
-            ],[
+                    text: this.notifications
+                        ? (this.emoji ? '🔕 ' : '') + 'Выключить напоминания'
+                        : (this.emoji ? '🔔 ' : '') + 'Включить напоминания',
+                },
                 {
-                    text: (this.emoji ? "⚙️ " : "") + "Перенастроить бота"
-                },{
-                    text: this.showSettings ? ( (this.emoji ? "⚙️ " : "") + "Убрать настройки") : ((this.emoji ? "⚙️ " : "") + "Показывать настройки")
-                }
-            ],[
-                { // TODO: Заменить емодзи на другое
-                    text: this.showTeachers ? ( (this.emoji ? "⚙️ " : "") + "Убрать расписания преподавателей") : ((this.emoji ? "⚙️ " : "") + "Показывать расписания преподавателей")
-                }
-                
-            ],[
+                    text: this.emoji ? (this.emoji ? '🙅‍♂️ ' : '') + 'Выключить эмодзи' : 'Включить эмодзи', // Тут нет эмодзи, потому что оно тут в любом случае будет отсутствовать
+                },
+            ],
+            [
                 {
-                    text: (this.emoji ? "🛑 " : "") + "Отмена"
-                }
-            ]
+                    text: (this.emoji ? '⚙️ ' : '') + 'Перенастроить бота',
+                },
+                {
+                    text: this.showSettings ? (this.emoji ? '⚙️ ' : '') + 'Убрать настройки' : (this.emoji ? '⚙️ ' : '') + 'Показывать настройки',
+                },
+            ],
+            [
+                {
+                    // TODO: Заменить емодзи на другое
+                    text: this.showTeachers
+                        ? (this.emoji ? '⚙️ ' : '') + 'Убрать расписания преподавателей'
+                        : (this.emoji ? '⚙️ ' : '') + 'Показывать расписания преподавателей',
+                },
+            ],
+            [
+                {
+                    text: (this.emoji ? '🛑 ' : '') + 'Отмена',
+                },
+            ],
         ];
     }
 }

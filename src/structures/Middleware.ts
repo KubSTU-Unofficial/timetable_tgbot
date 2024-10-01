@@ -1,10 +1,10 @@
-import { Message } from "node-telegram-bot-api";
-import User from "./User.js";
+import { Message } from 'node-telegram-bot-api';
+import User from './User.js';
 
 enum MiddlewareTypes {
     Pre,
     Post,
-    Test
+    Test,
 }
 
 export default abstract class Middleware {
@@ -12,5 +12,5 @@ export default abstract class Middleware {
 
     type = MiddlewareTypes.Pre;
 
-    abstract exec(user: User, msg: Message):void | number;
+    abstract exec(user: User, msg: Message): void | number;
 }
