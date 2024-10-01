@@ -9,21 +9,24 @@ export default class TodayCommand extends Command {
     sceneName = ['main'];
     middlewares = [GroupTestMiddleware];
 
+    /**
+    Возвращает понедельник заданной недели. Если заданная неделя это воскресенье, то вернёт следующий понедельник.
+    */
+    getMonday(oldDate: Date) {
+        let date = new Date(oldDate);
+        date.setDate(date.getDate() - (date.getDay() == 7 ? 0 : date.getDay()) + 1);
+        return date;
+    }
+
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let date = new Date();
-        let curMonday = new Date();
-
-        curMonday.setHours(0, 0, 0, 0);
-        curMonday.setDate(curMonday.getDate() - (curMonday.getDay() || 7) + 1);
-
+        let curMonday = this.getMonday(new Date());
         let nextMonday = new Date(curMonday);
-
         nextMonday.setDate(nextMonday.getDate() + 7);
 
-        let schedule1 = await user.group.getTextFullSchedule(date.getWeek() % 2 == 0, curMonday);
-        let schedule2 = await user.group.getTextFullSchedule(date.getWeek() % 2 == 1, nextMonday);
+        let schedule1 = await user.group.getTextFullSchedule(curMonday.getWeek() % 2 == 0, curMonday);
+        let schedule2 = await user.group.getTextFullSchedule(nextMonday.getWeek() % 2 == 0, nextMonday);
 
         let opt: SendMessageOptions = {
             parse_mode: 'HTML',
