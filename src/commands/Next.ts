@@ -41,9 +41,12 @@ export default class NearestCommand extends Command {
             schedule: IRespOFOPara[] = [],
             eventsText: string | null = null;
 
+        date.setDate(date.getDate() + 1);
+
         for (let i = 0; i <= 14; i++) {
             day = date.getDay();
             week = date.getWeek() % 2 == 0;
+
             schedule = fullRawSchedule.filter((p) => p.nedtype.nedtype_id == (week ? 2 : 1) && p.dayofweek.dayofweek_id == day);
             eventsText = await user.group.getTextEvents(date);
 
