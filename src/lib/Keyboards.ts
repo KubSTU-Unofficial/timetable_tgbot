@@ -22,7 +22,7 @@ export let instKeyboard = [
     ],
     [
         {
-            text: 'ИСиТИ',
+            text: 'ИСТИ',
             callback_data: 'settings_inst_538',
         },
         {
