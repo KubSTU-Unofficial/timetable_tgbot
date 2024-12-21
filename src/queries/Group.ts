@@ -2,7 +2,7 @@ import { CallbackQuery } from 'node-telegram-bot-api';
 import Query from '../structures/Query.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
-import ScheduleModel from '../shared/models/ScheduleModel.js';
+import ScheduleModel from '../shared/models/OScheduleModel.js';
 
 interface KeyboardButton {
     text: string;

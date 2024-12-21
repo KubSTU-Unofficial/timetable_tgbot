@@ -1,4 +1,4 @@
-import { weekNumber, days as daysWeek } from '../shared/lib/Utils.js';
+import { days as daysWeek } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
 
 export default class Teacher extends BaseTeacher {
@@ -6,7 +6,7 @@ export default class Teacher extends BaseTeacher {
         if (!this.schedule) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
 
         let date = new Date();
-        let num = weekNumber(date);
+        // let num = weekNumber(date);
         let days = this.schedule.days.filter((elm) => elm.even == week);
         let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`;
 
@@ -31,15 +31,15 @@ export default class Teacher extends BaseTeacher {
                     `  Аудитория: ${lesson.auditory}\n` +
                     `  Группа: ${lesson.group}\n`;
 
-                if (lesson.period) {
-                    para = `${para}  Период: ${lesson.period}\n`;
+                // if (lesson.period) {
+                //     para = `${para}  Период: ${lesson.period}\n`;
 
-                    let period = [+lesson.period.split(' ')[1], +lesson.period.split(' ')[3]];
+                //     let period = [+lesson.period.split(' ')[1], +lesson.period.split(' ')[3]];
 
-                    if (num && (period[0] > num || period[1] < num)) {
-                        para = `<i>${para}</i>`;
-                    }
-                }
+                //     if (num && (period[0] > num || period[1] < num)) {
+                //         para = `<i>${para}</i>`;
+                //     }
+                // }
 
                 out += para + '\n';
             });
