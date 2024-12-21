@@ -16,7 +16,7 @@ export default class ShowTeachersCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         let showTeachers = Command.commandName({ buttons: { title: 'Показывать расписания преподавателей', emoji: '⚙️' } }).includes(msg.text!);
 
-        user.updateData({ showTeachers });
+        await user.updateData({ showTeachers });
         user.setScene('main');
 
         Cache.bot.sendMessage(

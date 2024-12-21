@@ -20,7 +20,7 @@ export default class SettingsCommand extends Command {
 
         user.setScene('settings');
 
-        Cache.bot.sendMessage(msg.chat.id, 'Выбери, что стоит настроить', {
+        Cache.bot.sendMessage(msg.chat.id, 'Настройки', {
             reply_markup: {
                 keyboard: user.getSettingsKeyboard(),
                 remove_keyboard: true,

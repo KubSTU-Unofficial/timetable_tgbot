@@ -16,7 +16,7 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         let showSettings = Command.commandName({ buttons: { title: 'Показывать настройки', emoji: '⚙️' } }).includes(msg.text!);
 
-        user.updateData({ showSettings });
+        await user.updateData({ showSettings });
         user.setScene('main');
 
         Cache.bot.sendMessage(
