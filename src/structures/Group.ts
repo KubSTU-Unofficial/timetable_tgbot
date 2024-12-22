@@ -10,7 +10,7 @@ export default class Group extends BaseGroup {
         let weekNum = date ? weekNumber(date) : null;
 
         lessons.forEach((elm) => {
-            para += `\n\n${elm.pair} пара: ${elm.disc.disc_name} [${BaseGroup.lessonsTypes[elm.kindofnagr.kindofnagr_name]}]\n  Время: ${BaseGroup.lessonsTime[elm.pair]}`;
+            para += `\n\n${elm.pair} пара: ${elm.disc.disc_name} [${BaseGroup.lessonsTypes[elm.kindofnagr.kindofnagr_name]}]\n  Время: ${BaseGroup.lessonsTime[elm.pair].join(' - ')}`;
             if (elm.teacher) para += `\n  Преподаватель: ${elm.teacher}`;
             if (elm.classroom) para += `\n  Аудитория: ${elm.classroom}`;
             if (elm.persent_of_gr != 100) para += `\n  Процент группы: ${elm.persent_of_gr}%`;
@@ -70,7 +70,7 @@ export default class Group extends BaseGroup {
 
             if (curDayLessons.length)
                 out +=
-                    `\n<b>${days[i]} | ${startDate.stringDate()}, ${BaseGroup.lessonsTime[curDayLessons[0].pair].split(' - ')[0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].pair].split(' - ')[1]}</b>\n` +
+                    `\n<b>${days[i]} | ${startDate.stringDate()}, ${BaseGroup.lessonsTime[curDayLessons[0].pair][0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].pair][1]}</b>\n` +
                     curDayLessons.reduce(
                         (acc, lesson) =>
                             acc +
