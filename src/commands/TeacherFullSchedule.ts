@@ -3,6 +3,7 @@ import Command from '../structures/Command.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import Teacher from '../structures/Teacher.js';
+import { getMonday } from '../shared/lib/Utils.js';
 
 export default class TodayCommand extends Command {
     name = {};
@@ -43,10 +44,12 @@ export default class TodayCommand extends Command {
         if (!teacher.schedule)
             return Cache.bot.sendMessage(msg.chat.id, 'Я не знаю такого учителя. Проверь всё ли верно ты написал и попробуй ещё раз', options);
 
-        let date = new Date();
+        let curMonday = getMonday(new Date());
+        let nextMonday = new Date(curMonday);
+        nextMonday.setDate(nextMonday.getDate() + 7);
 
-        let schedule1 = teacher.getTextFullSchedule(date.getWeek() % 2 == 0);
-        let schedule2 = teacher.getTextFullSchedule(date.getWeek() % 2 == 1);
+        let schedule1 = teacher.getTextFullSchedule(curMonday);
+        let schedule2 = teacher.getTextFullSchedule(nextMonday);
 
         // TODO: Сделай уже с этим что-нибудь!
         if ((schedule1 && schedule1?.length > 4096) || (schedule2 && schedule2?.length > 4096))

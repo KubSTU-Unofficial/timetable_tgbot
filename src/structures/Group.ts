@@ -45,10 +45,15 @@ export default class Group extends BaseGroup {
         );
     }
 
-    async getTextFullSchedule(week: boolean, startDate: Date) {
+    async getTextFullSchedule(startDate: Date) {
         let schedule = await this.getFullRawSchedule();
+
+        // Возможно проверок избыточно
+        if (!schedule || schedule == null || schedule == undefined) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
+
+        let week = startDate.getWeek() % 2 == 0;
         let num = weekNumber(startDate);
-        let out = '';
+        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
 
         let dict: { [index: string]: string } = {
             Лекции: 'Лек',
@@ -56,24 +61,22 @@ export default class Group extends BaseGroup {
             'Лабораторные занятия': 'Лаб',
         };
 
-        if (schedule == null || schedule == undefined) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
-
-        out += `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
-
-        if (!schedule.length) return out + 'Здесь ничего нет...';
-
         let currWeekLessons: IRespOFOPara[] = schedule.filter((elm) => elm.nedtype.nedtype_id == (week ? 2 : 1));
+
+        if (!currWeekLessons.length) return out + 'Здесь ничего нет...';
 
         for (let i = 1; i <= 7; i++) {
             let curDayLessons = currWeekLessons.filter((p) => p.dayofweek.dayofweek_id == i);
 
-            if (curDayLessons.length) {
-                out += `\n<b>${days[i]} | ${startDate.stringDate()}, ${BaseGroup.lessonsTime[curDayLessons[0].pair].split(' - ')[0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].pair].split(' - ')[1]}</b>\n`;
-
-                curDayLessons.forEach((lesson) => {
-                    out += `  ${lesson.pair}. ${lesson.disc.disc_name} [${dict[lesson.kindofnagr.kindofnagr_name] ?? lesson.kindofnagr.kindofnagr_name}] (${lesson.classroom})\n`;
-                });
-            }
+            if (curDayLessons.length)
+                out +=
+                    `\n<b>${days[i]} | ${startDate.stringDate()}, ${BaseGroup.lessonsTime[curDayLessons[0].pair].split(' - ')[0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].pair].split(' - ')[1]}</b>\n` +
+                    curDayLessons.reduce(
+                        (acc, lesson) =>
+                            acc +
+                            `  ${lesson.pair}. ${lesson.disc.disc_name} [${dict[lesson.kindofnagr.kindofnagr_name] ?? lesson.kindofnagr.kindofnagr_name}] (${lesson.classroom})\n`,
+                        '',
+                    );
 
             startDate.setDate(startDate.getDate() + 1);
         }

@@ -1,48 +1,36 @@
-import { days as daysWeek } from '../shared/lib/Utils.js';
+import { days, weekNumber } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
 
 export default class Teacher extends BaseTeacher {
-    getTextFullSchedule(week: boolean) {
-        if (!this.schedule) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
+    getTextFullSchedule(startDate: Date) {
+        if (!this.schedule || this.schedule == null || this.schedule == undefined) return null;
 
-        let date = new Date();
-        // let num = weekNumber(date);
-        let days = this.schedule.days.filter((elm) => elm.even == week);
-        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`;
+        let week = startDate.getWeek() % 2 == 0;
+        let schedule = this.schedule.days.filter((elm) => elm.even == week);
+        let num = weekNumber(startDate);
+        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
 
-        if (!days.length) return out + `На этой неделе у преподавателя нет пар...`;
+        if (!schedule.length) return out + 'Здесь ничего нет...';
 
         let dict: { [index: string]: string } = {
+            Лекция: 'Лек',
             Лабораторная: 'Лаб',
             Практика: 'Прак',
-            Лекция: 'Лек',
         };
 
-        // Находим понедельник
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() - (date.getDay() || 7) + ((date.getWeek() % 2 == 0) != week ? 7 : 0) + days[0].daynum);
+        let date = new Date(startDate);
 
-        days.forEach((day, i, arr) => {
-            out += `\n<b>${daysWeek[day.daynum]} | ${date.stringDate()}</b>\n`;
-
-            day.daySchedule.forEach((lesson) => {
-                let para =
-                    `${lesson.number}. ${lesson.name} [${dict[lesson.paraType] ?? lesson.paraType}]\n` +
-                    `  Аудитория: ${lesson.auditory}\n` +
-                    `  Группа: ${lesson.group}\n`;
-
-                // if (lesson.period) {
-                //     para = `${para}  Период: ${lesson.period}\n`;
-
-                //     let period = [+lesson.period.split(' ')[1], +lesson.period.split(' ')[3]];
-
-                //     if (num && (period[0] > num || period[1] < num)) {
-                //         para = `<i>${para}</i>`;
-                //     }
-                // }
-
-                out += para + '\n';
-            });
+        schedule.forEach((day, i, arr) => {
+            out +=
+                `\n<b>${days[day.daynum]} | ${date.stringDate()}</b>\n` +
+                day.daySchedule.reduce(
+                    (acc, lesson) =>
+                        acc +
+                        `${lesson.number}. ${lesson.name} [${dict[lesson.paraType] ?? lesson.paraType}]\n` +
+                        `  Аудитория: ${lesson.auditory}\n` +
+                        `  Группа: ${lesson.group}\n\n`,
+                    '',
+                );
 
             if (arr[i + 1]) date.setUTCDate(date.getUTCDate() + (arr[i + 1].daynum - day.daynum));
         });

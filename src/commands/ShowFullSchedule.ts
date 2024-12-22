@@ -3,30 +3,22 @@ import Command from '../structures/Command.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
+import { getMonday } from '../shared/lib/Utils.js';
 
 export default class TodayCommand extends Command {
     name = { command: 'showall' };
     sceneName = ['main'];
     middlewares = [GroupTestMiddleware];
 
-    /**
-    Возвращает понедельник заданной недели. Если заданная неделя это воскресенье, то вернёт следующий понедельник.
-    */
-    getMonday(oldDate: Date) {
-        let date = new Date(oldDate);
-        date.setDate(date.getDate() - (date.getDay() == 7 ? 0 : date.getDay()) + 1);
-        return date;
-    }
-
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let curMonday = this.getMonday(new Date());
+        let curMonday = getMonday(new Date());
         let nextMonday = new Date(curMonday);
         nextMonday.setDate(nextMonday.getDate() + 7);
 
-        let schedule1 = await user.group.getTextFullSchedule(curMonday.getWeek() % 2 == 0, curMonday);
-        let schedule2 = await user.group.getTextFullSchedule(nextMonday.getWeek() % 2 == 0, nextMonday);
+        let schedule1 = await user.group.getTextFullSchedule(curMonday);
+        let schedule2 = await user.group.getTextFullSchedule(nextMonday);
 
         let opt: SendMessageOptions = {
             parse_mode: 'HTML',
