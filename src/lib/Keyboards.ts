@@ -1,5 +1,5 @@
 import { KeyboardButton } from 'node-telegram-bot-api';
-import { daysOdd, daysEven } from '../shared/lib/Utils.js';
+import { daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
 
 export let instKeyboard = [
     [
@@ -114,7 +114,7 @@ export const mainKeyboard = [
 export function selectingDayKeyboard(date: Date = new Date()): KeyboardButton[][] {
     let out: KeyboardButton[][] = [daysOdd.slice().map((elm) => ({ text: elm })), daysEven.slice().map((elm) => ({ text: elm }))];
 
-    if (date.getWeek() % 2 == 0) out.reverse();
+    if (getMonday(date).getWeek() % 2 == 0) out.reverse();
 
     return out;
 }

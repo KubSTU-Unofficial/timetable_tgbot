@@ -4,6 +4,7 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import SponsorMessagesMiddleware from '../middlewares/RandomMessages.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
+import { getMonday } from '../shared/lib/Utils.js';
 
 export default class SelectingDayCommand extends Command {
     name = {
@@ -21,10 +22,9 @@ export default class SelectingDayCommand extends Command {
         let week = this.name.buttons.indexOf(msg.text!) >= 6;
 
         // Получаем дату выбранного дня
-        let date = new Date();
+        let date = getMonday(new Date());
 
-        date.setHours(0, 0, 0, 0);
-        date.setDate(date.getDate() - (date.getDay() || 7) + day + ((date.getWeek() % 2 == 0) == week ? 0 : 7));
+        date.setDate(date.getDate() - 1 + day + ((date.getWeek() % 2 == 0) == week ? 0 : 7));
 
         let schedule = await user.group.getTextSchedule(date, { showDate: true });
 
