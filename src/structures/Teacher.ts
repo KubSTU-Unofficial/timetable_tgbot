@@ -20,6 +20,8 @@ export default class Teacher extends BaseTeacher {
 
         let date = new Date(startDate);
 
+        if (schedule[0].daynum != 1) date.setDate(date.getDate() + schedule[0].daynum - 1);
+
         schedule.forEach((day, i, arr) => {
             out +=
                 `\n<b>${days[day.daynum]} | ${date.stringDate()}</b>\n` +
@@ -32,7 +34,7 @@ export default class Teacher extends BaseTeacher {
                     '',
                 );
 
-            if (arr[i + 1]) date.setUTCDate(date.getUTCDate() + (arr[i + 1].daynum - day.daynum));
+            if (arr[i + 1]) date.setDate(date.getDate() + (arr[i + 1].daynum - day.daynum));
         });
 
         return out;
