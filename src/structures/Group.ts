@@ -94,6 +94,9 @@ export default class Group extends BaseGroup {
         let ugod = date.getFullYear() - (date.getMonth() >= 6 ? 0 : 1);
         let sem = date.getMonth() > 5 ? 1 : 2;
 
+        if (!this.cachedFullRawSchedule) await this.getFullRawSchedule();
+        if (sem == 2 && this.cachedFullRawSchedule?.lessonsStartDate && this.cachedFullRawSchedule.lessonsStartDate > new Date()) sem = 1;
+
         // TODO: Вынести в отдельный метод с получением из БД
         let resp = await APIConvertor.exam(this.name, ugod, sem);
 
