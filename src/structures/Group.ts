@@ -7,7 +7,8 @@ export default class Group extends BaseGroup {
     formatSchedule(lessons: IRespOFOPara[], date = new Date()) {
         let out = '';
         let para = '';
-        let weekNum = date ? weekNumber(date) : null;
+        let startDate = this.cachedFullRawSchedule?.lessonsStartDate; // TODO: Подозреваю, это довольно сильное упущение, но пока что будет такой костыль
+        let weekNum = date && startDate ? weekNumber(startDate, date) : null;
 
         lessons.forEach((elm) => {
             para += `\n\n${elm.pair} пара: ${elm.disc.disc_name} [${BaseGroup.lessonsTypes[elm.kindofnagr.kindofnagr_name]}]\n  Время: ${BaseGroup.lessonsTime[elm.pair].join(' - ')}`;
@@ -52,7 +53,11 @@ export default class Group extends BaseGroup {
         if (!schedule || schedule == null || schedule == undefined) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
 
         let week = startDate.getWeek() % 2 == 0;
-        let num = weekNumber(startDate);
+        let lessonsStartDate = this.cachedFullRawSchedule?.lessonsStartDate;
+        let num = lessonsStartDate ? weekNumber(lessonsStartDate, startDate) : null;
+
+        num = num && num <= 0 ? null : num;
+
         let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
 
         let dict: { [index: string]: string } = {

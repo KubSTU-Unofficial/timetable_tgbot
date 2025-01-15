@@ -1,4 +1,4 @@
-import { days, weekNumber } from '../shared/lib/Utils.js';
+import { days } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
 
 export default class Teacher extends BaseTeacher {
@@ -7,8 +7,7 @@ export default class Teacher extends BaseTeacher {
 
         let week = startDate.getWeek() % 2 == 0;
         let schedule = this.schedule.days.filter((elm) => elm.even == week);
-        let num = weekNumber(startDate);
-        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
+        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`;
 
         if (!schedule.length) return out + 'Здесь ничего нет...';
 
