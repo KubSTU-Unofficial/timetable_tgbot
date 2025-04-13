@@ -17,12 +17,8 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let text;
-        let schedule = await user.group.getTextSchedule();
+        let text = await user.group.getTextSchedule();
         let events = await user.group.getTextEvents();
-
-        if (!schedule) text = '<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>';
-        else text = schedule;
 
         if (events) text += `\n\n${events}`;
         // if(events && (!user.group.token || user.token == user.group.token)) text += `\n\n${events}`;

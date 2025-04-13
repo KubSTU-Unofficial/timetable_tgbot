@@ -1,5 +1,4 @@
 import { Message } from 'node-telegram-bot-api';
-import { instKeyboard } from '../lib/Keyboards.js';
 import Command from '../structures/Command.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
@@ -26,14 +25,24 @@ export default class TodayCommand extends Command {
             if (!user.group) {
                 user.scene = Cache.scenes.find((s) => s.name == 'settings');
 
-                replytext +=
-                    'У тебя не установлена некоторая важная для меня информация. Подскажи пожалуйста,\n\nКакой у тебя институт. Если твоего тут нет, значит можешь написать мне в ЛС (@Elektroplayer), чтобы я его добавил. Если что-то пошло не так, пиши туда же - я не кусаюсь.';
+                replytext += 'У тебя не установлена некоторая важная для меня информация. Подскажи пожалуйста,\n\nКакая у тебя форма обучения?';
 
                 Cache.bot.sendMessage(msg.chat.id, replytext, {
                     disable_web_page_preview: true,
                     parse_mode: 'HTML',
                     reply_markup: {
-                        inline_keyboard: instKeyboard,
+                        inline_keyboard: [
+                            [
+                                {
+                                    text: 'ОФО',
+                                    callback_data: 'settings_fo_ofo',
+                                },
+                                {
+                                    text: 'ЗФО',
+                                    callback_data: 'settings_fo_zfo',
+                                },
+                            ],
+                        ],
                         resize_keyboard: true,
                     },
                 });

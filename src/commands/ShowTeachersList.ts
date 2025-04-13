@@ -22,18 +22,7 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let schedule = await user.group.getFullRawSchedule();
-        let lessons: { [key: string]: { [key: string]: string[] } } = {};
-
-        if (schedule) {
-            schedule.forEach((lesson) => {
-                if (!lessons[lesson.disc.disc_name]) lessons[lesson.disc.disc_name] = {};
-                if (!lessons[lesson.disc.disc_name][lesson.teacher]) lessons[lesson.disc.disc_name][lesson.teacher] = [];
-                if (!lessons[lesson.disc.disc_name][lesson.teacher].includes(lesson.kindofnagr.kindofnagr_name))
-                    lessons[lesson.disc.disc_name][lesson.teacher].push(lesson.kindofnagr.kindofnagr_name);
-            });
-        }
-
+        let lessons: { [key: string]: { [key: string]: string[] } } = await user.group.getRawTeachersAndDisciplines();
         let out = `<b><u>ПРЕДМЕТЫ И ПРЕПОДАВАТЕЛИ</u></b>\n\n`;
 
         for (let lesson in lessons) {

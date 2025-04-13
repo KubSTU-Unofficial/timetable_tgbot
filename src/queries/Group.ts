@@ -2,7 +2,8 @@ import { CallbackQuery } from 'node-telegram-bot-api';
 import Query from '../structures/Query.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
-import ScheduleModel from '../shared/models/OScheduleModel.js';
+import OScheduleModel from '../shared/models/OScheduleModel.js';
+import ZScheduleModel from '../shared/models/ZScheduleModel.js';
 
 interface KeyboardButton {
     text: string;
@@ -35,7 +36,15 @@ export default class GroupQuery extends Query {
         let text: string = query.message!.text;
         let now: Date = new Date();
         let groupDate = (now.getFullYear() - db.kurs + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-        let schedules = await ScheduleModel.find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } }).exec();
+
+        let schedules: { group: string }[];
+        if (db.fo == 'ofo') schedules = await OScheduleModel.find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } }).exec();
+        else schedules = await ZScheduleModel.find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } }).exec();
+
+        // let schedules = (await (db.fo == 'ofo' ? OScheduleModel : ZScheduleModel)
+        //     .find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } })
+        //     .exec()) as { group: string }[];
+
         let groups = schedules.map((s) => s.group);
         let groupInfo = groupsInfo[db.inst_id!];
 

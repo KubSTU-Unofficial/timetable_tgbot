@@ -1,6 +1,3 @@
-import { KeyboardButton } from 'node-telegram-bot-api';
-import { daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
-
 export let instKeyboard = [
     [
         {
@@ -93,35 +90,8 @@ export const mainKeyboard = [
     ],
 ];
 
-// export const anotherDay = [
-//     daysOdd.slice().map((elm) => {
-//         return { text: elm };
-//     }),
-//     daysEven.slice().map((elm) => {
-//         return { text: elm };
-//     }),
-// ];
-
-// export const anotherDay = [
-//     days.slice().map((elm, i) => {
-//         return { text: elm, callback_data: `anotherDay_n${i}` };
-//     }),
-//     daysEven.slice().map((elm, i) => {
-//         return { text: elm, callback_data: `anotherDay_e${i}` };
-//     }),
-// ];
-
-export function selectingDayKeyboard(date: Date = new Date()): KeyboardButton[][] {
-    let out: KeyboardButton[][] = [daysOdd.slice().map((elm) => ({ text: elm })), daysEven.slice().map((elm) => ({ text: elm }))];
-
-    if (getMonday(date).getWeek() % 2 == 0) out.reverse();
-
-    return out;
-}
-
 export default {
     instKeyboard,
     kursKeyboard,
     mainKeyboard,
-    selectingDayKeyboard,
 };

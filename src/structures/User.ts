@@ -1,6 +1,5 @@
 import BaseUser from '../shared/structures/User.js';
 import Scene from './Scene.js';
-import Group from './Group.js';
 import Users from '../shared/models/TgUsersModel.js';
 import Cache from '../lib/Cache.js';
 import { KeyboardButton } from 'node-telegram-bot-api';
@@ -10,7 +9,7 @@ import { KeyboardButton } from 'node-telegram-bot-api';
 export default class User extends BaseUser {
     scene?: Scene;
 
-    group?: Group;
+    group?: IUnifiedGroup;
     notifications: boolean = false;
     emoji: boolean = true;
     showSettings: boolean = true;
@@ -21,6 +20,7 @@ export default class User extends BaseUser {
      * Используется для временного хранения данных при настройке
      */
     dataBuffer: {
+        fo: string;
         id: number;
         inst_id?: number;
         kurs?: number;

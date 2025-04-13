@@ -2,7 +2,6 @@ import { Message } from 'node-telegram-bot-api';
 import Command from '../structures/Command.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
-import { selectingDayKeyboard } from '../lib/Keyboards.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
 
 export default class AnotherDayCommand extends Command {
@@ -13,10 +12,21 @@ export default class AnotherDayCommand extends Command {
 
     async exec(user: User, msg: Message): Promise<void> {
         if (msg.chat.type !== 'private') return;
+        if (!user.group) return;
 
-        Cache.bot.sendMessage(user.id, 'Выбери дату', {
+        user.setScene('selectDay');
+
+        let keyboard = user.group.selectDayKeyboard();
+
+        // FIXME: Костыль с вызовом getTextSchedule делается для того, чтобы загрузить в кэш расписание, если его нет
+        if (!keyboard.length) {
+            await user.group.getTextSchedule();
+            keyboard = user.group.selectDayKeyboard();
+        }
+
+        Cache.bot.sendMessage(user.id, 'Выбери день на кнопке или впиши дату в формате "ГГГГ-ММ-ДД"', {
             reply_markup: {
-                keyboard: selectingDayKeyboard(),
+                keyboard: keyboard,
                 resize_keyboard: true,
                 one_time_keyboard: true,
             },

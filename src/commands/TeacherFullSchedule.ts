@@ -18,8 +18,10 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<unknown> {
         user.setScene('main');
 
-        let schedule = await user.group!.getFullRawSchedule();
         let dict: { [key: string]: string } = {};
+        for (let teacher of await user.group!.getRawTeachersList()) {
+            dict[this.nameFormat(teacher)] = teacher;
+        }
 
         let options: SendMessageOptions = {
             parse_mode: 'HTML',
@@ -30,19 +32,12 @@ export default class TodayCommand extends Command {
             },
         };
 
-        if (schedule) {
-            schedule.forEach((lesson) => {
-                if (lesson.teacher && lesson.teacher !== 'Не назначен' && !dict[this.nameFormat(lesson.teacher)])
-                    dict[this.nameFormat(lesson.teacher)] = lesson.teacher;
-            });
-        }
-
         let teacher = new Teacher();
 
         await teacher.getSchedule([dict[msg.text!], msg.text!]);
 
         if (!teacher.schedule)
-            return Cache.bot.sendMessage(msg.chat.id, 'Я не знаю такого учителя. Проверь всё ли верно ты написал и попробуй ещё раз', options);
+            return Cache.bot.sendMessage(msg.chat.id, 'Я не знаю такого преподавателя. Проверь всё ли верно ты написал и попробуй ещё раз', options);
 
         let curMonday = getMonday(new Date());
         let nextMonday = new Date(curMonday);

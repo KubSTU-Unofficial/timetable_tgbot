@@ -14,11 +14,7 @@ export default class TodayCommand extends Command {
         if (!user.group) return;
 
         let curMonday = getMonday(new Date());
-        let nextMonday = new Date(curMonday);
-        nextMonday.setDate(nextMonday.getDate() + 7);
-
-        let schedule1 = await user.group.getTextFullSchedule(curMonday);
-        let schedule2 = await user.group.getTextFullSchedule(nextMonday);
+        let texts = await user.group.getTextFullSchedule(curMonday);
 
         let opt: SendMessageOptions = {
             parse_mode: 'HTML',
@@ -28,13 +24,11 @@ export default class TodayCommand extends Command {
             disable_web_page_preview: true,
         };
 
-        if (!schedule1 || !schedule2) {
-            Cache.bot.sendMessage(msg.chat.id, '<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>', opt);
-
-            return;
-        } else {
-            await Cache.bot.sendMessage(msg.chat.id, schedule1, opt);
-            await Cache.bot.sendMessage(msg.chat.id, schedule2, opt);
+        if (!texts) Cache.bot.sendMessage(msg.chat.id, '<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>', opt);
+        else {
+            for (let text of texts) {
+                await Cache.bot.sendMessage(msg.chat.id, text, opt);
+            }
         }
     }
 }

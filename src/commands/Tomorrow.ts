@@ -17,15 +17,9 @@ export default class TomorrowCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let date = new Date();
-        date.setDate(date.getDate() + 1);
-
-        let text;
-        let schedule = await user.group.getTextSchedule(date);
+        let date = new Date(Date.now() + 1000 * 60 * 60 * 24);
+        let text = await user.group.getTextSchedule(date);
         let events = await user.group.getTextEvents(date);
-
-        if (!schedule) text = '<b>Расписание не найдено...</b> <i>или что-то пошло не так...</i>';
-        else text = schedule;
 
         if (events) text += `\n\n${events}`;
         // if(events && (!user.group.token || user.token == user.group.token)) text += `\n\n${events}`;

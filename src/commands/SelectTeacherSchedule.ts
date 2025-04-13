@@ -28,14 +28,7 @@ export default class TodayCommand extends Command {
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let schedule = await user.group.getFullRawSchedule();
-        let teachers: string[] = [];
-
-        if (schedule) {
-            schedule.forEach((lesson) => {
-                if (lesson.teacher !== 'Не назначен' && !teachers.includes(lesson.teacher!)) teachers.push(lesson.teacher!);
-            });
-        }
+        let teachers: string[] = await user.group.getRawTeachersList();
 
         if (!teachers.length) {
             Cache.bot.sendMessage(msg.chat.id, 'Преподаватели не найдены!', {

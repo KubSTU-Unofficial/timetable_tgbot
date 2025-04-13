@@ -12,20 +12,14 @@ export default class KursQuery extends Query {
         if (!query?.message?.text) return;
 
         let text = query.message!.text;
+        let db = user.dataBuffer.find((db) => db.id == query.message?.message_id);
 
-        user.dataBuffer.push({
-            id: query.message?.message_id,
-            inst_id: +query.data!.slice(14, query.data!.length),
-        });
+        if (!db) {
+            Cache.bot.sendMessage(query.message!.chat.id, 'Похоже эта кнопка себя исчерпала');
+            return;
+        }
 
-        setTimeout(
-            () => {
-                let elm = user.dataBuffer.find((db) => db.id == query.message?.message_id);
-
-                if (elm) user.dataBuffer = user.dataBuffer.slice(user.dataBuffer.indexOf(elm), 1);
-            },
-            1000 * 60 * 5,
-        );
+        db.inst_id = +query.data!.slice(14, query.data!.length);
 
         Cache.bot.editMessageText(
             text

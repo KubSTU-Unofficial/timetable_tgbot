@@ -1,9 +1,11 @@
-import { days, weekNumber } from '../shared/lib/Utils.js';
+import { days, weekNumber, daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
 import BaseGroup from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
 import APIConvertor, { IRespOFOPara } from '../shared/lib/APIConvertor.js';
+import BaseOGroup from '../shared/structures/OGroup.js';
+import { KeyboardButton } from 'node-telegram-bot-api';
 
-export default class Group extends BaseGroup {
+export default class OGroup extends BaseOGroup implements IUnifiedGroup {
     formatSchedule(lessons: IRespOFOPara[], date = new Date()) {
         let out = '';
         let para = '';
@@ -46,7 +48,40 @@ export default class Group extends BaseGroup {
         );
     }
 
-    async getTextFullSchedule(startDate: Date) {
+    async getTextNextSchedule() {
+        let fullRawSchedule = await this.getFullRawSchedule();
+
+        if (!fullRawSchedule || !fullRawSchedule.length) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+
+        let date = new Date(Date.now() + 1000 * 60 * 60 * 24),
+            day: number = 0,
+            week: boolean = true,
+            schedule: IRespOFOPara[] = [],
+            eventsText: string | null = null;
+
+        for (let i = 0; i <= 14; i++) {
+            day = date.getDay();
+            week = date.getWeek() % 2 == 0;
+
+            schedule = fullRawSchedule.filter((p) => p.nedtype.nedtype_id == (week ? 2 : 1) && p.dayofweek.dayofweek_id == day);
+            eventsText = await this.getTextEvents(date);
+
+            if (schedule.length || eventsText) break;
+            else date.setDate(date.getDate() + 1);
+        }
+
+        if (!schedule.length && !eventsText) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+
+        let textSchedule = this.formatSchedule(schedule, date);
+
+        return (
+            `<b>${days[day]} / ${week ? 'Чётная' : 'Нечётная'} неделя / ${date.stringDate()}</b>` +
+            (!textSchedule ? '\nПар нет! Передохни:з' : textSchedule) +
+            (eventsText ? `\n\n${eventsText}` : '')
+        );
+    }
+
+    async getTextHalfFullSchedule(startDate: Date) {
         let schedule = await this.getFullRawSchedule();
 
         // Возможно проверок избыточно
@@ -87,6 +122,19 @@ export default class Group extends BaseGroup {
         }
 
         return out;
+    }
+
+    async getTextFullSchedule(curMonday: Date) {
+        // TODO: В будущем нужно всё это сделать одной фукнцией.
+
+        let nextMonday = new Date(curMonday);
+        nextMonday.setDate(nextMonday.getDate() + 7);
+
+        let out = [await this.getTextHalfFullSchedule(curMonday), await this.getTextHalfFullSchedule(nextMonday)];
+
+        if (out.some((s) => s == null)) return [];
+
+        return out as string[];
     }
 
     async getTextExams() {
@@ -149,5 +197,13 @@ export default class Group extends BaseGroup {
         );
 
         return out ? '<b>СОБЫТИЯ:</b>' + out : null;
+    }
+
+    selectDayKeyboard(date: Date = new Date()): KeyboardButton[][] {
+        let out: KeyboardButton[][] = [daysOdd.slice().map((elm) => ({ text: elm })), daysEven.slice().map((elm) => ({ text: elm }))];
+
+        if (getMonday(date).getWeek() % 2 == 0) out.reverse();
+
+        return out;
     }
 }
