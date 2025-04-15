@@ -32,13 +32,15 @@ export default class KursQuery extends Query {
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
                 .join('\n\n') +
-                '\n\nВыбери свой институт. Напиши <a href="https://t.me/Elektroplayer">сюда</a> если твоего тут нет или возникли проблемы.',
+                '\n\nКакой у тебя институт? Напиши <a href="https://t.me/Elektroplayer">сюда</a> если твоего тут нет или возникли проблемы.',
             {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,
                 reply_markup: {
                     inline_keyboard: instKeyboard,
                 },
+                disable_web_page_preview: true,
+                parse_mode: 'HTML',
             },
         );
 

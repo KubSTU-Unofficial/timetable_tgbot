@@ -14,7 +14,7 @@ export default class TodayCommand extends Command {
             return;
         }
 
-        let replyText = 'Включен режим перенастройки, укажи заново: \n\nКакая у тебя форма обучения?';
+        let replyText = 'Включен режим перенастройки.\n\nКакая у тебя форма обучения?';
 
         Cache.bot.sendMessage(msg.chat.id, replyText, {
             disable_web_page_preview: true,

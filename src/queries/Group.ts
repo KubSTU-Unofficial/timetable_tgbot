@@ -85,7 +85,7 @@ export default class GroupQuery extends Query {
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
                 .join('\n\n') +
-                `\n\nВыбери свою группу: ${groupDate}-${groupInfo?.identifier ?? ''}...\n<i>Если группы видно не полностью, попробуй перевернуть телефон</i>`,
+                `\n\nКакая у тебя группа: ${groupDate}-${groupInfo?.identifier ?? ''}...\n<i>Если группы видно не полностью, попробуй перевернуть телефон</i>`,
             {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,

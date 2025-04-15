@@ -25,7 +25,7 @@ export default class KursQuery extends Query {
             text
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') + '\n\nВыбери свой курс.',
+                .join('\n\n') + '\n\nКакой у тебя курс?',
             {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,
