@@ -1,41 +1,98 @@
-import { days } from '../shared/lib/Utils.js';
+import { days, getMonday } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
+import { ILessonSchema } from '../shared/models/LessonModel.js';
 
 export default class Teacher extends BaseTeacher {
-    getTextFullSchedule(startDate: Date) {
-        if (!this.schedule || this.schedule == null || this.schedule == undefined) return null;
+    getWeekDates(startDate: Date): Date[] {
+        const result: Date[] = [];
 
-        let week = startDate.getWeek() % 2 == 0;
-        let schedule = this.schedule.days.filter((elm) => elm.even == week);
-        let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`;
+        for (let i = 0; i < 7; i++) {
+            const current = new Date(startDate);
+            current.setDate(startDate.getDate() + i);
+            result.push(current);
+        }
 
-        if (!schedule.length) return out + 'Здесь ничего нет...';
+        return result;
+    }
 
-        let dict: { [index: string]: string } = {
-            Лекция: 'Лек',
-            Лабораторная: 'Лаб',
-            Практика: 'Прак',
-        };
+    formatDate(date: Date): string {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
 
-        let date = new Date(startDate);
+        return `${year}-${month}-${day}`;
+    }
 
-        if (schedule[0].daynum != 1) date.setDate(date.getDate() + schedule[0].daynum - 1);
+    getDayTextSchedule(schedule: ILessonSchema[], date: Date): string | undefined {
+        let dict = [undefined, 'Лек', 'Прак', 'Лаб'];
 
-        schedule.forEach((day, i, arr) => {
-            out +=
-                `\n<b>${days[day.daynum]} | ${date.stringDate()}</b>\n` +
-                day.daySchedule.reduce(
-                    (acc, lesson) =>
-                        acc +
-                        `${lesson.number}. ${lesson.name} [${dict[lesson.paraType] ?? lesson.paraType}]\n` +
-                        `  Аудитория: ${lesson.auditory}\n` +
-                        `  Группа: ${lesson.group}\n\n`,
-                    '',
-                );
+        let dayOfWeek = date.getDay();
+        let nedType = date.getWeek() % 2 == 0;
+        let datez = this.formatDate(date);
 
-            if (arr[i + 1]) date.setDate(date.getDate() + (arr[i + 1].daynum - day.daynum));
-        });
+        let lessonsInCurDay = schedule
+            .filter((s) => ('dayOfWeek' in s.day && s.day.nedType == nedType && s.day.dayOfWeek == dayOfWeek) || ('datez' in s.day && s.day.datez == datez))
+            .sort((a, b) => a.number - b.number);
+
+        if(!lessonsInCurDay.length) return;
+
+        return `<b>${days[dayOfWeek]} | ${date.stringDate()}</b>\n` + lessonsInCurDay.reduce(
+            (acc, lesson) => {
+                let out = `${lesson.number}. ${lesson.name} [${dict[lesson.type]}]\n` +
+                    `  Аудитория: ${lesson.classroom}\n` +
+                    `  Группа: ${lesson.group}\n\n`;
+
+                if('nedType' in lesson.day && lesson.day.weeks.startDate && lesson.day.weeks.startDate > new Date()) out = `<i>${out}\nПериод: c ${lesson.day.weeks.from} по ${lesson.day.weeks.to} неделю</i>>`;
+
+                return acc + out;
+            },
+            '',
+        );
+    }
+
+    async getTextFullSchedule() {
+        let schedule = await this.getFullRawSchedule();
+
+        if (!schedule) return;
+        if (!schedule.length) return [`Здесь ничего нет...`];
+
+        console.log(schedule);
+
+        let now = new Date();
+        let curMonday = getMonday(now);
+        let nextMonday = new Date(curMonday.valueOf() + 1000 * 60 * 60 * 24 * 7); // Накидываем неделю
+        let out = [`<u><b>${curMonday.getWeek() % 2 == 0 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`];
+
+        for(let date of this.getWeekDates(curMonday)) {
+            let text = this.getDayTextSchedule(schedule, date);
+
+            if(!text) continue;
+
+            if((out[out.length-1] + `\n${text}`).length > 4096) out.push(text);
+            else out[out.length-1] += `\n${text}`;
+        }
+
+        if(out[out.length-1] == `<u><b>${curMonday.getWeek() % 2 == 0 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
+            out[out.length-1] += `Здесь ничего нет...`;
+
+        out.push(`<u><b>${curMonday.getWeek() % 2 == 1 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`);
+
+        for(let date of this.getWeekDates(nextMonday)) {
+            let text = this.getDayTextSchedule(schedule, date);
+
+            if(!text) continue;
+
+            if((out[out.length-1] + `\n${text}`).length > 4096) out.push(text);
+            else out[out.length-1] += `\n${text}`;
+        }
+
+        if(out[out.length-1] == `<u><b>${curMonday.getWeek() % 2 == 1 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
+            out[out.length-1] += `Здесь ничего нет...`;
 
         return out;
+    }
+
+    static fromArray(arr: string[]) {
+        return new Teacher(arr.reduce((a, b) => (b.length > a.length ? b : a), ''));
     }
 }

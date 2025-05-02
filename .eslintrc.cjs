@@ -45,6 +45,14 @@ module.exports = {
             0, 
             {}
         ],
-        "@typescript-eslint/no-non-null-asserted-optional-chain": 0
+        "@typescript-eslint/no-non-null-asserted-optional-chain": 0,
+        '@typescript-eslint/ban-types': [
+            'error',
+            {
+                types: {
+                    '{}': false, // <-- разрешить использовать {}
+                },
+            },
+        ]
     }
 };

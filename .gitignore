@@ -1,6 +1,7 @@
 /node_modules
 .env
 /.vscode
+/.idea
 .prettierrc
 bun.lockb
 /dist

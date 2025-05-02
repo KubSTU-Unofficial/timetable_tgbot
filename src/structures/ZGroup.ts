@@ -1,19 +1,21 @@
 import { days } from '../shared/lib/Utils.js';
 import BaseGroup from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
-import APIConvertor, { IRespZFOPara } from '../shared/lib/APIConvertor.js';
+import APIConvertor, { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
 import BaseZGroup from '../shared/structures/ZGroup.js';
 import { KeyboardButton } from 'node-telegram-bot-api';
+import { ILesson } from '../shared/models/LessonModel.js';
 
 export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
-    formatSchedule(lessons: IRespZFOPara[]) {
+    formatSchedule(lessons: ILesson[]) {
         let out = '';
         let para = '';
 
         lessons.forEach((elm) => {
-            para += `\n\n${elm.pair} пара: ${elm.disc.disc_name} [${BaseGroup.lessonsTypes[elm.kindofnagr.kindofnagr_name]}]\n  Время: ${BaseGroup.lessonsTime[elm.pair].join(' - ')}`;
-            if (elm.teacher) para += `\n  Преподаватель: ${elm.teacher}`;
-            if (elm.classroom) para += `\n  Аудитория: ${elm.classroom}`;
+            para += `\n\n${elm.number} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]\n  Время: ${BaseGroup.lessonsTime[elm.number].join(' - ')}`
+            + `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}`
+            + `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
+
             if (elm.comment) para += `\n  Примечание: ${elm.comment}`;
 
             out += para;
@@ -47,21 +49,26 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         if (!fullRawSchedule || !fullRawSchedule.length) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
         let sortedSchedule = fullRawSchedule
-            .map((pair) => ({ ...pair, date: new Date(pair.datez) }))
-            .sort((a, b) => a.date.getTime() - b.date.getTime());
+            .flatMap((p) => {
+                if('datez' in p.day) {
+                    return [{...p, day: {datez: p.day.datez, date: new Date(p.day.datez)}}];
+                }
+                else return [];
+            })
+            .sort((a, b) => a.day.date.getTime() - b.day.date.getTime());
         let closestDate: Date | undefined;
         let now = new Date();
 
         for (let pair of sortedSchedule) {
-            if (pair.date > now) {
-                closestDate = pair.date;
+            if (pair.day.date > now) {
+                closestDate = pair.day.date;
                 break;
             }
         }
 
         if (!closestDate) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
-        let schedule: IRespZFOPara[] = sortedSchedule.filter((pair) => pair.date == closestDate);
+        let schedule: ILesson[] = sortedSchedule.filter((pair) => pair.day.date == closestDate);
         let eventsText = await this.getTextEvents(closestDate);
         let textSchedule = this.formatSchedule(schedule);
 
@@ -78,27 +85,20 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
     async getTextFullSchedule() {
         let schedule = await this.getFullRawSchedule();
 
-        // Возможно проверок избыточно
-        if (!schedule || schedule == null || schedule == undefined) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
+        if (!schedule) return null; // "<b>Произошла ошибка<b>\nСкорее всего сайт с расписанием не работает...";
 
-        // let week = startDate.getWeek() % 2 == 0;
         let out = [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\n\n`];
         let daysText: string[] = [];
+        let dict = [undefined, 'Лек', 'Прак', 'Лаб'];
 
-        let dict: { [index: string]: string } = {
-            Лекции: 'Лек',
-            'Практические занятия': 'Прак',
-            'Лабораторные занятия': 'Лаб',
-        };
-
-        let currWeekLessons: IRespZFOPara[] = schedule; //.filter((elm) => elm.nedtype.nedtype_id == (week ? 2 : 1));
-
-        if (!currWeekLessons.length) return [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\nЗдесь ничего нет...`];
+        if (!schedule.length) return [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\nЗдесь ничего нет...`];
 
         let grouped = schedule.reduce(
             (acc, item) => {
-                if (!acc[item.datez]) acc[item.datez] = [];
-                acc[item.datez].push(item);
+                if('datez' in item.day) {
+                    if (!acc[item.day.datez]) acc[item.day.datez] = [];
+                    acc[item.day.datez].push(item);
+                }
                 return acc;
             },
             {} as Record<string, (typeof schedule)[number][]>,
@@ -106,11 +106,11 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
 
         for (let day in grouped) {
             daysText.push(
-                `<b>${days[new Date(day).getDay()]} | ${day}, ${BaseGroup.lessonsTime[grouped[day][0].pair][0]} - ${BaseGroup.lessonsTime[grouped[day][grouped[day].length - 1].pair][1]}</b>\n` +
+                `<b>${days[new Date(day).getDay()]} | ${day}, ${BaseGroup.lessonsTime[grouped[day][0].number][0]} - ${BaseGroup.lessonsTime[grouped[day][grouped[day].length - 1].number][1]}</b>\n` +
                     grouped[day].reduce(
                         (acc, lesson) =>
                             acc +
-                            `  ${lesson.pair}. ${lesson.disc.disc_name} [${dict[lesson.kindofnagr.kindofnagr_name] ?? lesson.kindofnagr.kindofnagr_name}] (${lesson.classroom})\n`,
+                            `  ${lesson.number}. ${lesson.name} [${dict[lesson.type]}] (${lesson.classroom})\n`,
                         '',
                     ),
             );
@@ -160,24 +160,13 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         // то группе, под эти критерии не подходящей, событие показываться не будет.
         let filter = {
             $or: [
-                {
-                    date: date,
-                },
-                {
-                    startDate: { $lte: date },
-                    endDate: { $gte: date },
-                },
+                { date: date },
+                { startDate: { $lte: date }, endDate: { $gte: date } },
             ],
             $and: [
-                {
-                    $or: [{ groups: undefined }, { groups: this.name }],
-                },
-                {
-                    $or: [{ kurses: undefined }, { kurses: this.kurs }],
-                },
-                {
-                    $or: [{ inst_ids: undefined }, { inst_ids: this.instId }],
-                },
+                { $or: [{ groups: undefined }, { groups: this.name }] },
+                { $or: [{ kurses: undefined }, { kurses: this.kurs }] },
+                { $or: [{ inst_ids: undefined }, { inst_ids: this.instId }] },
             ],
         };
 
@@ -194,8 +183,13 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         let schedule = this.cachedFullRawSchedule?.data;
 
         if (!schedule) return [];
+        let dateMap = new Map<string, { text: string }>();
 
-        let dates = [...new Set(schedule.map((s) => s.datez))].map((s) => ({ text: s }));
+        for (const s of schedule) {
+            if ('datez' in s.day && !dateMap.has(s.day.datez)) dateMap.set(s.day.datez, { text: s.day.datez });
+        }
+
+        let dates = Array.from(dateMap.values());
         let out: KeyboardButton[][] = [];
 
         for (let i = 0; i < dates.length; i += 3) {

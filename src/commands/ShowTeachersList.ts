@@ -9,16 +9,6 @@ export default class TodayCommand extends Command {
     sceneName = ['main'];
     middlewares = [GroupTestMiddleware];
 
-    nameFormat(name: string) {
-        let nameArr = name.split(' ');
-
-        return `${nameArr[0]} ${nameArr[1][0]}. ${nameArr[2][0]}.`;
-    }
-
-    buttonFormat(text: string) {
-        return { text };
-    }
-
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 

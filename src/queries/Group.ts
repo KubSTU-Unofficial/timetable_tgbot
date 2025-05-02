@@ -2,8 +2,7 @@ import { CallbackQuery } from 'node-telegram-bot-api';
 import Query from '../structures/Query.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
-import OScheduleModel from '../shared/models/OScheduleModel.js';
-import ZScheduleModel from '../shared/models/ZScheduleModel.js';
+import { groupsList } from '../shared/lib/APIConvertor.js';
 
 interface KeyboardButton {
     text: string;
@@ -21,7 +20,7 @@ export default class GroupQuery extends Query {
     name = ['settings_kurs'];
     sceneName = 'settings';
 
-    async exec(user: User, query: CallbackQuery): Promise<void> {
+    async exec(user: User, query: CallbackQuery): Promise<unknown> {
         if (!query?.message?.text) return; // не знаю как, но на всякий случай
 
         let db = user.dataBuffer.find((db) => db.id == query.message?.message_id);
@@ -36,33 +35,20 @@ export default class GroupQuery extends Query {
         let text: string = query.message!.text;
         let now: Date = new Date();
         let groupDate = (now.getFullYear() - db.kurs + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-
-        let schedules: { group: string }[];
-        if (db.fo == 'ofo') schedules = await OScheduleModel.find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } }).exec();
-        else schedules = await ZScheduleModel.find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } }).exec();
-
-        // let schedules = (await (db.fo == 'ofo' ? OScheduleModel : ZScheduleModel)
-        //     .find({ inst_id: db.inst_id!, group: { $regex: `^${groupDate}-` } })
-        //     .exec()) as { group: string }[];
-
-        let groups = schedules.map((s) => s.group);
+        let groups = (await groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: db.inst_id, kurs: db.kurs, foe: db.fo as 'ofo' | 'zfo'}))?.data.map(g => g.name);
         let groupInfo = groupsInfo[db.inst_id!];
 
-        if (!groups || groups!.length == 0) {
-            Cache.bot.editMessageText(
-                text
-                    .split('\n\n')
-                    .slice(0, text.split('\n\n').length - 1)
-                    .join('\n\n') +
-                    '\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer',
-                {
-                    chat_id: query.message.chat.id,
-                    message_id: query.message.message_id,
-                },
-            );
-
-            return;
-        }
+        if (!groups || groups.length == 0) return Cache.bot.editMessageText(
+            text
+                .split('\n\n')
+                .slice(0, text.split('\n\n').length - 1)
+                .join('\n\n') +
+                '\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer',
+            {
+                chat_id: query.message.chat.id,
+                message_id: query.message.message_id,
+            },
+        );
 
         let keyboard: KeyboardButton[][] = [];
         let buffer: KeyboardButton[] = [];
