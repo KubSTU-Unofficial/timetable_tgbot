@@ -6,7 +6,7 @@ export default class Teacher extends BaseTeacher {
     getWeekDates(startDate: Date): Date[] {
         const result: Date[] = [];
 
-        for (let i = 0; i < 7; i++) {
+        for(let i = 0; i < 7; i++) {
             const current = new Date(startDate);
             current.setDate(startDate.getDate() + i);
             result.push(current);
@@ -31,8 +31,8 @@ export default class Teacher extends BaseTeacher {
         let datez = this.formatDate(date);
 
         let lessonsInCurDay = schedule
-            .filter((s) => ('dayOfWeek' in s.day && s.day.nedType == nedType && s.day.dayOfWeek == dayOfWeek) || ('datez' in s.day && s.day.datez == datez))
-            .sort((a, b) => a.number - b.number);
+        .filter((s) => ('dayOfWeek' in s.day && s.day.nedType == nedType && s.day.dayOfWeek == dayOfWeek) || ('datez' in s.day && s.day.datez == datez))
+        .sort((a, b) => a.number - b.number);
 
         if(!lessonsInCurDay.length) return;
 
@@ -53,10 +53,8 @@ export default class Teacher extends BaseTeacher {
     async getTextFullSchedule() {
         let schedule = await this.getFullRawSchedule();
 
-        if (!schedule) return;
-        if (!schedule.length) return [`Здесь ничего нет...`];
-
-        console.log(schedule);
+        if(!schedule) return;
+        if(!schedule.length) return [`Здесь ничего нет...`];
 
         let now = new Date();
         let curMonday = getMonday(now);
@@ -68,12 +66,12 @@ export default class Teacher extends BaseTeacher {
 
             if(!text) continue;
 
-            if((out[out.length-1] + `\n${text}`).length > 4096) out.push(text);
-            else out[out.length-1] += `\n${text}`;
+            if((out[out.length - 1] + `\n${text}`).length > 4096) out.push(text);
+            else out[out.length - 1] += `\n${text}`;
         }
 
-        if(out[out.length-1] == `<u><b>${curMonday.getWeek() % 2 == 0 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
-            out[out.length-1] += `Здесь ничего нет...`;
+        if(out[out.length - 1] == `<u><b>${curMonday.getWeek() % 2 == 0 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
+            out[out.length - 1] += `Здесь ничего нет...`;
 
         out.push(`<u><b>${curMonday.getWeek() % 2 == 1 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`);
 
@@ -82,12 +80,12 @@ export default class Teacher extends BaseTeacher {
 
             if(!text) continue;
 
-            if((out[out.length-1] + `\n${text}`).length > 4096) out.push(text);
-            else out[out.length-1] += `\n${text}`;
+            if((out[out.length - 1] + `\n${text}`).length > 4096) out.push(text);
+            else out[out.length - 1] += `\n${text}`;
         }
 
-        if(out[out.length-1] == `<u><b>${curMonday.getWeek() % 2 == 1 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
-            out[out.length-1] += `Здесь ничего нет...`;
+        if(out[out.length - 1] == `<u><b>${curMonday.getWeek() % 2 == 1 ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ:</b></u>\n`)
+            out[out.length - 1] += `Здесь ничего нет...`;
 
         return out;
     }

@@ -30,9 +30,9 @@ export default class User extends BaseUser {
      * Инициализация. Получение данных из БД
      */
     async init() {
-        let userData = await Users.findOne({ userId: this.id }).exec();
+        let userData = await Users.findOne({ userId: this.id }).lean().exec();
 
-        if (userData?.inst_id && userData?.group) {
+        if(userData?.inst_id && userData?.group) {
             this.group = Cache.getGroup(userData.group, userData.inst_id);
             this.notifications = userData?.notifications ?? false;
             this.emoji = userData?.emoji ?? true;
@@ -55,12 +55,12 @@ export default class User extends BaseUser {
     }) {
         await Users.findOneAndUpdate({ userId: this.id }, opt, { upsert: true });
 
-        if (opt.inst_id != undefined && opt.group != undefined) this.group = Cache.getGroup(opt.group, opt.inst_id); // this.setGroup(opt.group, opt.instId);
+        if(opt.inst_id != undefined && opt.group != undefined) this.group = Cache.getGroup(opt.group, opt.inst_id); // this.setGroup(opt.group, opt.instId);
 
-        if (opt.notifications != undefined) this.notifications = opt.notifications;
-        if (opt.emoji != undefined) this.emoji = opt.emoji;
-        if (opt.showSettings != undefined) this.showSettings = opt.showSettings;
-        if (opt.showTeachers != undefined) this.showTeachers = opt.showTeachers;
+        if(opt.notifications != undefined) this.notifications = opt.notifications;
+        if(opt.emoji != undefined) this.emoji = opt.emoji;
+        if(opt.showSettings != undefined) this.showSettings = opt.showSettings;
+        if(opt.showTeachers != undefined) this.showTeachers = opt.showTeachers;
     }
 
     setScene(sceneName: string) {
@@ -75,7 +75,7 @@ export default class User extends BaseUser {
 
         let userData = await Users.findOne({ userId: this.id }).exec();
 
-        if (userData) {
+        if(userData) {
             userData.token = token;
             userData.save().catch(console.log);
         }
@@ -89,13 +89,24 @@ export default class User extends BaseUser {
         // TODO: Сделать удаление из массива Cache.users
     }
 
-    async updateLastActivity() {
-        let user = await Users.findOne({ userId: this.id }).exec();
+    // async updateLastActivity() {
+    //     let user = await Users.findOne({ userId: this.id }).exec();
+    //
+    //     if(user) {
+    //         user.lastActivity = new Date();
+    //         user.save().catch(console.log);
+    //     }
+    // }
 
-        if (user) {
-            user.lastActivity = new Date();
-            user.save().catch(console.log);
-        }
+    updateLastActivity() {
+        return Users.findOne({ userId: this.id }).exec()
+        .then(user => {
+            if (user) {
+                user.lastActivity = new Date();
+                return user.save();
+            }
+        })
+        .catch(console.log);
     }
 
     /**
@@ -121,8 +132,8 @@ export default class User extends BaseUser {
             ],
         ];
 
-        if (this.showTeachers) arr.push([{ text: (this.emoji ? '👨‍🏫 ' : '') + 'Расписания преподавателей' }]);
-        if (this.showSettings) arr.push([{ text: (this.emoji ? '⚙️ ' : '') + 'Настройки' }]);
+        if(this.showTeachers) arr.push([{ text: (this.emoji ? '👨‍🏫 ' : '') + 'Расписания преподавателей' }]);
+        if(this.showSettings) arr.push([{ text: (this.emoji ? '⚙️ ' : '') + 'Настройки' }]);
 
         return arr;
     }

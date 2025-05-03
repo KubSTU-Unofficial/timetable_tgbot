@@ -7,6 +7,7 @@ enum MiddlewareTypes {
     Test,
 }
 
+// TODO: Возможно, от них надо избавляться в пользу декораторов
 export default abstract class Middleware {
     static types = MiddlewareTypes;
 
