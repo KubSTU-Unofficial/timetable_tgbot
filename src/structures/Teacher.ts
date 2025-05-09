@@ -91,6 +91,7 @@ export default class Teacher extends BaseTeacher {
     }
 
     static fromArray(arr: string[]) {
+        if(arr.length == 1) return new Teacher(arr[0]);
         return new Teacher(arr.reduce((a, b) => (b.length > a.length ? b : a), ''));
     }
 }

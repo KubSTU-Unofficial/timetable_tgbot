@@ -31,7 +31,7 @@ export default class TodayCommand extends Command {
             },
         };
 
-        let teacher = Teacher.fromArray([dict[msg.text!], msg.text!]);
+        let teacher = dict[msg.text!] ? new Teacher(dict[msg.text!]) :  new Teacher(msg.text!);
         let texts = await teacher.getTextFullSchedule();
 
         if(!texts) return Cache.bot.sendMessage(msg.chat.id, 'Что-то пошло не так, расписание не найдено...', options);
