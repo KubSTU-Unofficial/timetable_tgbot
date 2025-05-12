@@ -6,10 +6,10 @@
     "cron": "^3.1.6",
     "fs": "^0.0.1-security",
     "https": "^1.0.0",
-    "mongoose": "^8.1.2",
+    "mongoose": "^8.14.2",
     "node-fetch": "^3.3.2",
     "node-html-parser": "^6.1.12",
-    "node-telegram-bot-api": "^0.63.0",
+    "node-telegram-bot-api": "^0.66.0",
     "typescript-eslint": "^7.5.0"
   },
   "devDependencies": {
