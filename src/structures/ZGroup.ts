@@ -55,6 +55,7 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
             } else return [];
         })
         .sort((a, b) => a.day.date.getTime() - b.day.date.getTime());
+
         let closestDate: Date | undefined;
         let now = new Date();
 
@@ -67,7 +68,7 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
 
         if(!closestDate) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
-        let schedule: ILessonSchema[] = sortedSchedule.filter((pair) => pair.day.date == closestDate);
+        let schedule: ILessonSchema[] = sortedSchedule.filter((pair) => pair.day.date.valueOf() == closestDate?.valueOf());
         let eventsText = await this.getTextEvents(closestDate);
         let textSchedule = this.formatSchedule(schedule);
 
