@@ -1,10 +1,10 @@
 import { CallbackQuery } from 'node-telegram-bot-api';
-import { instKeyboard } from '../lib/Keyboards.js';
+import { fakKeyboard } from '../lib/Keyboards.js';
 import Query from '../structures/Query.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 
-export default class KursQuery extends Query {
+export default class FakQuery extends Query {
     name = ['settings_fo'];
     sceneName = 'settings';
 
@@ -37,7 +37,7 @@ export default class KursQuery extends Query {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,
                 reply_markup: {
-                    inline_keyboard: instKeyboard,
+                    inline_keyboard: fakKeyboard,
                 },
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',

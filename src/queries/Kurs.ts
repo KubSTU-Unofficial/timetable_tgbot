@@ -5,7 +5,7 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 
 export default class KursQuery extends Query {
-    name = ['settings_inst'];
+    name = ['settings_fak'];
     sceneName = 'settings';
 
     async exec(user: User, query: CallbackQuery): Promise<void> {
@@ -19,7 +19,7 @@ export default class KursQuery extends Query {
             return;
         }
 
-        db.inst_id = +query.data!.slice(14, query.data!.length);
+        db.inst_id = +query.data!.slice(13, query.data!.length);
 
         Cache.bot.editMessageText(
             text

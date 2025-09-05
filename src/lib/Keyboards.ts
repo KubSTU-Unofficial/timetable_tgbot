@@ -1,40 +1,54 @@
-export let instKeyboard = [
+export let fakKeyboard = [
     [
         {
-            text: 'ИНГиЭ',
-            callback_data: 'settings_inst_495',
+            text: 'ФНГиЭ',
+            callback_data: 'settings_fak_495',
         },
         {
-            text: 'ИКСиИБ',
-            callback_data: 'settings_inst_516',
+            text: 'ФИТиК',
+            callback_data: 'settings_fak_516',
         },
         {
-            text: 'ИПиПП',
-            callback_data: 'settings_inst_490',
+            text: 'ФБиПП',
+            callback_data: 'settings_fak_490',
         },
         {
-            text: 'ИЭУиБ',
-            callback_data: 'settings_inst_29',
+            text: 'ФЭУиБ',
+            callback_data: 'settings_fak_29',
         },
     ],
     [
         {
-            text: 'ИСТИ',
-            callback_data: 'settings_inst_538',
+            text: 'ФАСиАД',
+            callback_data: 'settings_fak_538',
         },
         {
-            text: 'ИМРИТиТС',
-            callback_data: 'settings_inst_539',
+            text: 'ФИМиТ',
+            callback_data: 'settings_fak_539',
         },
         {
-            text: 'ИФН',
-            callback_data: 'settings_inst_540',
+            text: 'ФФН',
+            callback_data: 'settings_fak_540',
         },
         {
             text: 'ИТК',
-            callback_data: 'settings_inst_541',
+            callback_data: 'settings_fak_541',
         },
     ],
+    [
+        {
+            text: 'ПО для ИО',
+            callback_data: 'settings_fak_34',
+        },
+        {
+            text: 'НПИ',
+            callback_data: 'settings_fak_50',
+        },
+        {
+            text: 'АМТИ',
+            callback_data: 'settings_fak_52',
+        },
+    ]
 ];
 
 export const kursKeyboard = [
@@ -91,7 +105,7 @@ export const mainKeyboard = [
 ];
 
 export default {
-    instKeyboard,
+    fakKeyboard,
     kursKeyboard,
     mainKeyboard,
 };
