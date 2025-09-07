@@ -22,7 +22,9 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "start": "npx tsc && node --env-file=.env ."
+    "start": "node --env-file=.env .",
+    "dev": "npx tsc && node --enable-source-maps --env-file=.env .",
+    "build": "npx tsc"
   },
   "author": "Elektroplayer",
   "license": "ISC",
