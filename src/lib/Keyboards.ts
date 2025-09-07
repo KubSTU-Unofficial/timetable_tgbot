@@ -37,7 +37,7 @@ export let fakKeyboard = [
     ],
     [
         {
-            text: 'ПО для ИО',
+            text: 'ПОдИО',
             callback_data: 'settings_fak_34',
         },
         {

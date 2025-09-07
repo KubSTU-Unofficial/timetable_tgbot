@@ -4,7 +4,6 @@
   "type": "module",
   "dependencies": {
     "cron": "^3.1.6",
-    "fs": "^0.0.1-security",
     "https": "^1.0.0",
     "mongoose": "^8.14.2",
     "node-fetch": "^3.3.2",

@@ -32,7 +32,7 @@ export default class FakQuery extends Query {
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
                 .join('\n\n') +
-                '\n\nКакой у тебя факультет? Напиши <a href="https://t.me/Elektroplayer">сюда</a> если твоего тут нет или возникли проблемы.',
+                '\n\nКакой у тебя институт/факультет?',
             {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,
@@ -44,14 +44,14 @@ export default class FakQuery extends Query {
             },
         );
 
-        if (query.data!.slice(12, query.data!.length) == 'zfo')
-            Cache.bot.sendMessage(
-                query.message.chat.id,
-                'ЗФО было добавлено недавно. Если нашли проблемы или считаете элемент интерфейса неудобным, обратитесь <a href="https://t.me/Elektroplayer">сюда</a>',
-                {
-                    disable_web_page_preview: true,
-                    parse_mode: 'HTML',
-                },
-            );
+        // if (query.data!.slice(12, query.data!.length) == 'zfo')
+        //     Cache.bot.sendMessage(
+        //         query.message.chat.id,
+        //         'ЗФО было добавлено недавно. Если нашли проблемы или считаете элемент интерфейса неудобным, обратитесь <a href="https://t.me/Elektroplayer">сюда</a>',
+        //         {
+        //             disable_web_page_preview: true,
+        //             parse_mode: 'HTML',
+        //         },
+        //     );
     }
 }
