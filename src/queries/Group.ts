@@ -32,35 +32,46 @@ export default class GroupQuery extends Query {
 
         db.kurs = +query.data!.slice(14, query.data!.length);
 
-        let text: string = query.message!.text;
-        let now: Date = new Date();
-        let groupDate = (now.getFullYear() - db.kurs + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-        let groups = (await groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: db.inst_id, kurs: db.kurs, foe: db.fo as 'ofo' | 'zfo'}))?.data.map(g => g.name);
-        let groupInfo = groupsInfo[db.inst_id!];
-
-        if (!groups || groups.length == 0) return Cache.bot.editMessageText(
-            text
+        let sendErrorMessage = () => {
+            return Cache.bot.editMessageText(
+                text
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
                 .join('\n\n') +
                 '\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer',
-            {
-                chat_id: query.message.chat.id,
-                message_id: query.message.message_id,
-            },
-        );
+                {
+                    chat_id: query.message!.chat.id,
+                    message_id: query.message!.message_id,
+                },
+            );
+        };
+
+        let text: string = query.message!.text;
+        let now: Date = new Date();
+        let groupDate = (now.getFullYear() - db.kurs + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
+        let groupsListResp = await groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: db.inst_id, kurs: db.kurs, foe: db.fo as 'ofo' | 'zfo'});
+
+        if(!groupsListResp?.isok || groupsListResp.data.length < 1) {
+            console.log(groupsListResp);
+            return sendErrorMessage();
+        }
+
+        let groupNames = groupsListResp?.data.map(g => g.name);
+        let groupInfo = groupsInfo[db.inst_id!];
+
+        if (!groupNames || groupNames.length == 0) return sendErrorMessage();
 
         let keyboard: KeyboardButton[][] = [];
         let buffer: KeyboardButton[] = [];
 
-        for (let i = 0; i < groups.length; i++) {
+        for (let i = 0; i < groupNames.length; i++) {
             if (i % 4 == 0 && i != 0) {
                 keyboard.push(buffer);
                 buffer = [];
             }
             buffer.push({
-                text: groups[i].substring(groupInfo?.substring ?? 3),
-                callback_data: 'settings_group_' + groups[i],
+                text: groupNames[i].substring(groupInfo?.substring ?? 3),
+                callback_data: 'settings_group_' + groupNames[i],
             });
         }
 
