@@ -22,7 +22,9 @@
   },
   "scripts": {
     "start": "node --env-file=.env .",
-    "dev": "npx tsc && node --enable-source-maps --env-file=.env .",
+    "dev": "npx tsc && node --enable-source-maps --env-file=.env . --debug",
+    "notifications": "node --env-file=.env ./dist/notificationsSend.js",
+    "notifications:dev": "npx tsc && node --env-file=.env --enable-source-maps ./dist/notificationsSend.js",
     "build": "npx tsc"
   },
   "author": "Elektroplayer",
