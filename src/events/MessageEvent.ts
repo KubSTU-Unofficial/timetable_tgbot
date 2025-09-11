@@ -36,7 +36,7 @@ export default class MessageEvent extends Event {
             // Если сообщение не является командой, я не увижу ваше сообщение
             // В добавок в группе можно отключить доступ к сообщениям у бота, команды будут работать
 
-            console.log(
+            console.dlog(
                 `[message] ${msg.from?.username ?? msg.from?.first_name ?? 'Нет ника (?)'}, ${msg.from.id}: ${user.group?.name ?? 'Не выбрана'}; ${msg.text};`,
             );
 

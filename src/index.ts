@@ -19,5 +19,9 @@ Date.prototype.stringDate = function () {
     return `${this.getDate()}.${this.getMonth() + 1}.${this.getFullYear()}`;
 };
 
+console.dlog = (...args: unknown[]) => {
+    if(process.argv.includes('--debug')) console.log(...args);
+};
+
 let main = new Main(); // Создание класса и запуск начальных процессов
 main.run();
