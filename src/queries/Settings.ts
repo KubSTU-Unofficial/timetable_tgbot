@@ -14,12 +14,12 @@ export default class FakQuery extends Query {
         let text = query.message!.text;
         let [, fo, fak, year, group] = query.data!.split("__");
 
-        const sendErrorMessage = (replyText = '\n\nЧто-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer') => {
+        const sendErrorMessage = (replyText = 'Что-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer') => {
             return Cache.bot.editMessageText(
                 text
                 .split('\n\n')
                 .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') +
+                .join('\n\n') + '\n\n' +
                 replyText,
                 {
                     chat_id: query.message!.chat.id,
