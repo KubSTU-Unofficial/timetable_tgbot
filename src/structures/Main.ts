@@ -5,7 +5,7 @@ import Cache from '../lib/Cache.js';
 import Query from './Query.js';
 
 export default class Main {
-    scenesNames = ['main', 'selectDay', 'settings', 'teachers'];
+    scenesNames = ['main', 'selectDay', 'settings', 'teachers', 'tools'];
 
     run() {
         this.initEvents();

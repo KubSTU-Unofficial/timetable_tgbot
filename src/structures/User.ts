@@ -132,7 +132,7 @@ export default class User extends BaseUser {
             ],
         ];
 
-        if(this.showTeachers) arr.push([{ text: (this.emoji ? '👨‍🏫 ' : '') + 'Расписания преподавателей' }]);
+        if(this.showTeachers) arr.push([{ text: (this.emoji ? '🛠 ' : '') + 'Инструменты' }]);
         if(this.showSettings) arr.push([{ text: (this.emoji ? '⚙️ ' : '') + 'Настройки' }]);
 
         return arr;
@@ -173,6 +173,21 @@ export default class User extends BaseUser {
                 {
                     text: (this.emoji ? '🛑 ' : '') + 'Отмена',
                 },
+            ],
+        ];
+    }
+
+    /**
+     * Получение клавиатуры инструментов
+     */
+    getToolsKeyboard(): KeyboardButton[][] {
+        return [
+            [
+                { text: (this.emoji ? '👨‍🏫 ' : '') + 'Расписания преподавателей' },
+            ],[
+                { text: (this.emoji ? '🔍 ' : '') + 'Свободная аудитория' },
+            ],[
+                { text: (this.emoji ? '🛑 ' : '') + 'Отмена' },
             ],
         ];
     }

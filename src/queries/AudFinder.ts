@@ -1,0 +1,118 @@
+import { CallbackQuery } from 'node-telegram-bot-api';
+import Query from '../structures/Query.js';
+import User from '../structures/User.js';
+import Cache from '../lib/Cache.js';
+import lessonModel from '../shared/models/LessonModel.js';
+
+function arrayDifference<T>(arr1: T[], arr2: T[]): T[] {
+    const set2 = new Set(arr2);
+    return arr1.filter(item => !set2.has(item));
+}
+
+function toDatez(date: Date): string {
+    const year = date.getFullYear();
+    const month = `${date.getMonth() + 1}`.padStart(2, '0'); // месяцы с 0
+    const day = `${date.getDate()}`.padStart(2, '0');
+    return `${year}-${month}-${day}`;
+}
+
+const cachedAnswers: Map<string, { data: ({ _id: number, classrooms: string[] })[], createdAt: Date }> = new Map();
+
+async function getOccupiedClassrooms(building: string) {
+    let now = new Date();
+    let cachedOccupiedClassrooms = cachedAnswers.get(building);
+
+    if(cachedOccupiedClassrooms && now.valueOf() - cachedOccupiedClassrooms.createdAt.valueOf() < 1000 * 60 * 60 * 4) return cachedOccupiedClassrooms.data;
+
+    let occupiedClassrooms: ({ _id: number, classrooms: string[] })[] = await lessonModel.aggregate([
+        {
+            $addFields: {
+                'day.weeks.endDate': {
+                    $add: [
+                        '$day.weeks.startDate',
+                        {
+                            $multiply: [
+                                { $subtract: ['$day.weeks.to', '$day.weeks.from'] },
+                                7 * 24 * 60 * 60 * 1000,
+                            ],
+                        },
+                    ],
+                },
+            },
+        },
+        {
+            $match: {
+                $or: [
+                    {
+                        'day.nedType': now.getWeek() % 2 == 0,
+                        'day.dayOfWeek': now.getDay(),
+                        'day.weeks.startDate': { $lte: now },
+                        'day.weeks.endDate': { $gte: now },
+                    },
+                    {
+                        'day.datez': toDatez(now),
+                    },
+                ],
+                classroom: { $regex: `^${building}-` },
+            },
+        },
+        {
+            $group: {
+                _id: '$number', // группируем по номеру пары
+                classrooms: { $addToSet: '$classroom' }, // уникальные аудитории
+            },
+        },
+        {
+            $sort: { _id: 1 }, // сортируем по номеру пары
+        },
+    ]);
+
+    cachedAnswers.set(building, {
+        data: occupiedClassrooms,
+        createdAt: now,
+    });
+
+    return occupiedClassrooms;
+}
+
+
+export default class FinalQuery extends Query {
+    name = ['audFinder'];
+    sceneName = 'main';
+
+    async exec(user: User, query: CallbackQuery): Promise<void> {
+        if(!query.message) return;
+
+        let [, building, arg2] = query.data?.split('__') ?? [];
+        let number = !arg2 ? 1 : +arg2;
+
+        let allClassrooms = await lessonModel.distinct('classroom', { classroom: { $regex: `^${building}-` } });
+
+        let occupiedClassrooms = (await getOccupiedClassrooms(building)).find(g => g._id == number)?.classrooms ?? [];
+        let freeClassrooms = arrayDifference(allClassrooms, occupiedClassrooms);
+        let text = freeClassrooms.join('; ');
+
+        const makeBtn = (text: string, suffix: number) => ({
+            text,
+            callback_data: `audFinder__${building}__${suffix}`,
+        });
+
+        const keyboard: { text: string, callback_data: string }[][] = [[]];
+        if(number > 1) keyboard[0].push(makeBtn('Предыдущая', number - 1));
+        if(number < 8) keyboard[0].push(makeBtn('Следующая', number + 1));
+
+
+        Cache.bot.editMessageText(
+            `<b>Поиск свободных аудиторий</b> (на сегодняшний день)\n<i>Этот инструмент может совершать ошибки. <a href="https://github.com/KubSTU-Unofficial/timetable_tgbot?tab=readme-ov-file#%D1%87%D0%B0%D1%81%D1%82%D0%BE-%D0%B7%D0%B0%D0%B4%D0%B0%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B">Подробнее тут</a>.</i>\n\n${number} пара:\n\n` + text,
+            {
+                disable_web_page_preview: true,
+                parse_mode: 'HTML',
+                chat_id: query.message.chat.id,
+                message_id: query.message.message_id,
+                reply_markup: {
+                    inline_keyboard: keyboard,
+                },
+            },
+        );
+    }
+}
