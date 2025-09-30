@@ -8,18 +8,6 @@ export default class Scene {
 
     constructor(public name: string) {
         this.importCommands();
-        this.importQueries();
-    }
-
-    async importQueries() {
-        for(let dirent of readdirSync('./dist/queries/', { withFileTypes: true })) {
-            if(!dirent.name.endsWith('.js')) continue;
-
-            let queryClass = (await import('../queries/' + dirent.name)).default;
-            let query: Query = new queryClass();
-
-            if(query.sceneName == this.name) this.queries.push(query);
-        }
     }
 
     async importCommands() {

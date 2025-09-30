@@ -36,7 +36,7 @@ class SponsorMessagesMiddleware extends Middleware {
         } else if (thisUser.count > 5) {
             let num = Math.floor(Math.random() * this.messages.length);
 
-            console.log(`[message] [+] доп сообщение ${num}.`);
+            console.dlog(`[message] [+] доп сообщение ${num}.`);
 
             Cache.bot.sendMessage(msg.chat.id, this.messages[num], { parse_mode: 'HTML' });
 

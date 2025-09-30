@@ -4,12 +4,14 @@ import ZGroup from '../structures/ZGroup.js';
 import Scene from '../structures/Scene.js';
 import User from '../structures/User.js';
 import BaseGroup from '../shared/structures/Group.js';
+import Query from '../structures/Query.js';
 
 class Cache {
     bot: TelegramBot = new TelegramBot(process.env.TOKEN, { polling: true });
     users: User[] = [];
     groups: IUnifiedGroup[] = [];
     scenes: Scene[] = [];
+    queries: Query[] = [];
 
     async getUser(userId: number) {
         let user = this.users.find((u) => u.id == userId);

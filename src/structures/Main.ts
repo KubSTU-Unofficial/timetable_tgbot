@@ -2,6 +2,7 @@ import { readdirSync } from 'fs';
 import Event from './Event.js';
 import Scene from './Scene.js';
 import Cache from '../lib/Cache.js';
+import Query from './Query.js';
 
 export default class Main {
     scenesNames = ['main', 'selectDay', 'settings', 'teachers'];
@@ -9,6 +10,7 @@ export default class Main {
     run() {
         this.initEvents();
         this.initScenes();
+        this.initQueries();
     }
 
     async initEvents() {
@@ -21,6 +23,19 @@ export default class Main {
             let event: Event = new eventClass();
 
             Cache.bot.on(event.name, event.exec);
+        }
+    }
+
+    async initQueries() {
+        for(let dirent of readdirSync('./dist/queries/', { withFileTypes: true })) {
+            if(!dirent.name.endsWith('.js')) continue;
+
+            console.log(`[loader] [+] Запрос ${dirent.name}`);
+
+            let queryClass = (await import('../queries/' + dirent.name)).default;
+            let query: Query = new queryClass();
+
+            Cache.queries.push(query);
         }
     }
 
