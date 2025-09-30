@@ -12,7 +12,7 @@ export default class TodayCommand extends Command {
         ],
     };
 
-    sceneName = ['main'];
+    sceneName = ['main', 'tools'];
     middlewares = [GroupTestMiddleware];
 
     nameFormat(name: string) {
@@ -39,6 +39,8 @@ export default class TodayCommand extends Command {
                     remove_keyboard: msg.chat.type !== 'private',
                 },
             });
+
+            user.setScene('main');
 
             return;
         }
