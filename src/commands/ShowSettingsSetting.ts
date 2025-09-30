@@ -7,14 +7,14 @@ export default class TodayCommand extends Command {
     name = {
         buttons: [
             { title: 'Убрать настройки', emoji: '⚙️' },
-            { title: 'Показывать настройки', emoji: '⚙️' },
+            { title: 'Показать настройки', emoji: '⚙️' },
         ],
     };
 
     sceneName = ['settings'];
 
     async exec(user: User, msg: Message): Promise<void> {
-        let showSettings = Command.commandName({ buttons: { title: 'Показывать настройки', emoji: '⚙️' } }).includes(msg.text!);
+        let showSettings = Command.commandName({ buttons: { title: 'Показать настройки', emoji: '⚙️' } }).includes(msg.text!);
 
         await user.updateData({ showSettings });
         user.setScene('main');

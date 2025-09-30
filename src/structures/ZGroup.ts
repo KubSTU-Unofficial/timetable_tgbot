@@ -121,8 +121,6 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
             else out[l] += daysText[i] + '\n';
         }
 
-        console.log(out);
-
         return out;
     }
 

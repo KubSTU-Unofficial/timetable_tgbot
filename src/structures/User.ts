@@ -13,18 +13,8 @@ export default class User extends BaseUser {
     notifications: boolean = false;
     emoji: boolean = true;
     showSettings: boolean = true;
-    showTeachers: boolean = true;
+    showTools: boolean = true;
     token?: string | null;
-
-    /**
-     * Используется для временного хранения данных при настройке
-     */
-    dataBuffer: {
-        fo: string;
-        id: number;
-        inst_id?: number;
-        kurs?: number;
-    }[] = [];
 
     /**
      * Инициализация. Получение данных из БД
@@ -37,9 +27,11 @@ export default class User extends BaseUser {
             this.notifications = userData?.notifications ?? false;
             this.emoji = userData?.emoji ?? true;
             this.showSettings = userData?.showSettings ?? true;
-            this.showTeachers = userData?.showTeachers ?? true;
+            this.showTools = userData?.showTools ?? true;
             this.token = userData?.token;
         }
+
+        return this;
     }
 
     /**
@@ -51,7 +43,7 @@ export default class User extends BaseUser {
         notifications?: boolean;
         emoji?: boolean;
         showSettings?: boolean;
-        showTeachers?: boolean;
+        showTools?: boolean;
     }) {
         await Users.findOneAndUpdate({ userId: this.id }, opt, { upsert: true });
 
@@ -60,7 +52,7 @@ export default class User extends BaseUser {
         if(opt.notifications != undefined) this.notifications = opt.notifications;
         if(opt.emoji != undefined) this.emoji = opt.emoji;
         if(opt.showSettings != undefined) this.showSettings = opt.showSettings;
-        if(opt.showTeachers != undefined) this.showTeachers = opt.showTeachers;
+        if(opt.showTools != undefined) this.showTools = opt.showTools;
     }
 
     setScene(sceneName: string) {
@@ -89,24 +81,11 @@ export default class User extends BaseUser {
         // TODO: Сделать удаление из массива Cache.users
     }
 
-    // async updateLastActivity() {
-    //     let user = await Users.findOne({ userId: this.id }).exec();
-    //
-    //     if(user) {
-    //         user.lastActivity = new Date();
-    //         user.save().catch(console.log);
-    //     }
-    // }
-
     updateLastActivity() {
-        return Users.findOne({ userId: this.id }).exec()
-        .then(user => {
-            if (user) {
-                user.lastActivity = new Date();
-                return user.save();
-            }
-        })
-        .catch(console.log);
+        Users.updateOne(
+            { userId: this.id },
+            { $set: { lastActivity: new Date() } }
+        ).exec().catch(console.log);
     }
 
     /**
@@ -132,7 +111,7 @@ export default class User extends BaseUser {
             ],
         ];
 
-        if(this.showTeachers) arr.push([{ text: (this.emoji ? '🛠 ' : '') + 'Инструменты' }]);
+        if(this.showTools) arr.push([{ text: (this.emoji ? '🛠 ' : '') + 'Инструменты' }]);
         if(this.showSettings) arr.push([{ text: (this.emoji ? '⚙️ ' : '') + 'Настройки' }]);
 
         return arr;
@@ -158,15 +137,14 @@ export default class User extends BaseUser {
                     text: (this.emoji ? '⚙️ ' : '') + 'Перенастроить бота',
                 },
                 {
-                    text: this.showSettings ? (this.emoji ? '⚙️ ' : '') + 'Убрать настройки' : (this.emoji ? '⚙️ ' : '') + 'Показывать настройки',
+                    text: this.showSettings ? (this.emoji ? '⚙️ ' : '') + 'Убрать настройки' : (this.emoji ? '⚙️ ' : '') + 'Показать настройки',
                 },
             ],
             [
                 {
-                    // TODO: Заменить емодзи на другое
-                    text: this.showTeachers
-                        ? (this.emoji ? '⚙️ ' : '') + 'Убрать расписания преподавателей'
-                        : (this.emoji ? '⚙️ ' : '') + 'Показывать расписания преподавателей',
+                    text: this.showTools
+                        ? (this.emoji ? '⚙️ ' : '') + 'Убрать инструменты'
+                        : (this.emoji ? '⚙️ ' : '') + 'Показать инструменты',
                 },
             ],
             [

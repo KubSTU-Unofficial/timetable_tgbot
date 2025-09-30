@@ -3,5 +3,5 @@ export default abstract class Event {
 
     abstract name: BotEvents;
 
-    abstract exec(...args: any[]): void;
+    abstract exec(...args: unknown[]): void;
 }

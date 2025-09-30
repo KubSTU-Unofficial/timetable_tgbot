@@ -8,37 +8,30 @@ import Query from '../structures/Query.js';
 
 class Cache {
     bot: TelegramBot = new TelegramBot(process.env.TOKEN, { polling: true });
-    users: User[] = [];
-    groups: IUnifiedGroup[] = [];
+    users = new Map<number, User>();
+    // groups: IUnifiedGroup[] = [];
+    groups = new Map<string, IUnifiedGroup>();
     scenes: Scene[] = [];
     queries: Query[] = [];
 
     async getUser(userId: number) {
-        let user = this.users.find((u) => u.id == userId);
+        if (this.users.has(userId)) return this.users.get(userId)!;
 
-        if (user) return user;
-        else {
-            let newUser = new User(userId);
+        let newUser = await new User(userId).init();
 
-            await newUser.init();
+        this.users.set(userId, newUser);
 
-            this.users.push(newUser);
-
-            return newUser;
-        }
+        return newUser;
     }
 
     getGroup(name: string, instId: number): IUnifiedGroup {
-        let group = this.groups.find((u) => u.name == name);
+        if (this.groups.has(name)) return this.groups.get(name)!;
 
-        if (group) return group;
-        else {
-            let newGroup = BaseGroup.isZFOGroup(name) ? new ZGroup(name, instId) : new OGroup(name, instId);
+        let newGroup = BaseGroup.isZFOGroup(name) ? new ZGroup(name, instId) : new OGroup(name, instId);
 
-            this.groups.push(newGroup);
+        this.groups.set(name, newGroup);
 
-            return newGroup;
-        }
+        return newGroup;
     }
 }
 
