@@ -24,11 +24,11 @@ export default class TodayCommand extends Command {
                     [
                         {
                             text: 'ОФО',
-                            callback_data: 'settings_fo_ofo',
+                            callback_data: 'settings__ofo',
                         },
                         {
                             text: 'ЗФО',
-                            callback_data: 'settings_fo_zfo',
+                            callback_data: 'settings__zfo',
                         },
                     ],
                 ],
