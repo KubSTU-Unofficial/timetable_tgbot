@@ -20,9 +20,13 @@ const cachedAnswers: Map<string, { data: ({ _id: number, classrooms: string[] })
 
 async function getOccupiedClassrooms(building: string) {
     let now = new Date();
+    let startOfToday= new Date(now.getFullYear(), now.getMonth(), now.getDate());
     let cachedOccupiedClassrooms = cachedAnswers.get(building);
 
-    if(cachedOccupiedClassrooms && now.valueOf() - cachedOccupiedClassrooms.createdAt.valueOf() < 1000 * 60 * 60 * 4) return cachedOccupiedClassrooms.data;
+    if(cachedOccupiedClassrooms
+        && now.valueOf() - cachedOccupiedClassrooms.createdAt.valueOf() < 1000 * 60 * 60 * 4
+        && cachedOccupiedClassrooms.createdAt >= startOfToday
+    ) return cachedOccupiedClassrooms.data;
 
     let occupiedClassrooms: ({ _id: number, classrooms: string[] })[] = await lessonModel.aggregate([
         {
