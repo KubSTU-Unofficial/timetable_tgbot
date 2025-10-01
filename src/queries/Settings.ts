@@ -3,7 +3,7 @@ import { faculties } from '../shared/lib/Utils.js';
 import Query from '../structures/Query.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
-import { groupsList } from '../shared/lib/APIConvertor.js';
+import APIConvertor from '../shared/lib/APIConvertor.js';
 
 export default class FakQuery extends Query {
     name = ['settings'];
@@ -84,7 +84,7 @@ export default class FakQuery extends Query {
         if(!group) {
             let now: Date = new Date();
             let groupDate = (now.getFullYear() - +year + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-            let groupsListResp = await groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: fak, kurs: year, foe: fo as 'ofo' | 'zfo'});
+            let groupsListResp = await APIConvertor.groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: fak, kurs: year, foe: fo as 'ofo' | 'zfo'});
 
             if(!groupsListResp?.isok) {
                 console.log(groupsListResp);
