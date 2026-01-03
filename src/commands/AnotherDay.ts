@@ -5,6 +5,7 @@ import Cache from '../lib/Cache.js';
 import SponsorMessagesMiddleware from '../middlewares/RandomMessages.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
 import { getMonday } from '../shared/lib/Utils.js';
+import { isValid, parse } from 'date-fns';
 
 export default class SelectingDayCommand extends Command {
     name = {};
@@ -18,10 +19,10 @@ export default class SelectingDayCommand extends Command {
 
         user.setScene('main');
 
-        let date = new Date(msg.text);
+        let date = parse(msg.text?.replace(/-/g, '.'), 'd.M.yyyy', new Date()); // new Date(msg.text);
         let text;
 
-        if (!isNaN(date.valueOf())) text = await user.group.getTextSchedule(date, { showDate: true });
+        if (!isNaN(date.valueOf()) && isValid(date)) text = await user.group.getTextSchedule(date, { showDate: true });
         else {
             let index = this.days.indexOf(msg.text);
 

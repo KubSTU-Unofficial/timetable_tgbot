@@ -2,7 +2,6 @@ import TelegramBot from 'node-telegram-bot-api';
 import Event from '../structures/Event.js';
 import Cache from '../lib/Cache.js';
 import Middleware from '../structures/Middleware.js';
-import Command from '../structures/Command.js';
 
 export default class MessageEvent extends Event {
     name = 'message' as BotEvents;
@@ -16,9 +15,8 @@ export default class MessageEvent extends Event {
 
         if(!user.scene) user.setScene('main');
 
-        let command =
-            user.scene!.commands.find((c) => Command.commandName(c.name).includes(msg.text!)) ??
-            user.scene!.commands.find((c) => Command.commandName(c.name).length == 0);
+        // Делегируем поиск команды текущей сцене пользователя
+        const command = user.scene!.findCommand(msg.text);
 
         if(!command) {
             if(msg.chat.type == 'private') {
@@ -28,33 +26,39 @@ export default class MessageEvent extends Event {
                         resize_keyboard: true,
                     },
                 });
-
-                user.scene = Cache.scenes.find((x) => x.name == 'main');
+                // Возвращаем пользователя в главное меню, если команда не найдена
+                user.setScene('main');
             }
-        } else {
-            // Отправка сообщения в консоль происходит уже после проверки на существование команды
-            // Если сообщение не является командой, я не увижу ваше сообщение
-            // В добавок в группе можно отключить доступ к сообщениям у бота, команды будут работать
+            return;
+        }
 
-            console.dlog(
-                `[message] ${msg.from?.username ?? msg.from?.first_name ?? 'Нет ника (?)'}, ${msg.from.id}: ${user.group?.name ?? 'Не выбрана'}; ${msg.text};`,
-            );
+        // Отправка сообщения в консоль происходит уже после проверки на существование команды
+        // Если сообщение не является командой, я не увижу ваше сообщение
+        // В добавок в группе можно отключить доступ к сообщениям у бота, команды будут работать
 
-            // await command.middlewares.filter(mw => mw.type == Middleware.types.Pre).forEach(async mw => {
-            //     await mw.exec(user, msg);
-            // });
+        console.dlog(
+            `[message] ${msg.from?.username ?? msg.from?.first_name ?? 'Нет ника (?)'}, ${msg.from.id}: ${user.group?.name ?? 'Не выбрана'}; ${msg.text};`,
+        );
 
-            // Проверяем, все ли middlewares "согласны"
-            let condition = command.middlewares
-            .filter((mw) => mw.type == Middleware.types.Pre)
-            .some((mw) => ![0, undefined].includes(mw.exec(user, msg)!));
+        try {
+            // Pre-middlewares
+            for (const mw of command.middlewares.filter(m => m.type === Middleware.types.Pre)) {
+                const result = await mw.exec(user, msg);
+                if (result === 1) { // Явный стоп-сигнал
+                    return;
+                }
+            }
 
-            if(condition) return;
-
+            // Command execution
             await command.exec(user, msg);
 
-            // Выполняем, как я их называл postwares
-            command.middlewares.filter((mw) => mw.type == Middleware.types.Post).forEach((mw) => mw.exec(user, msg));
+            // Post-middlewares
+            for (const mw of command.middlewares.filter(m => m.type === Middleware.types.Post)) {
+                await mw.exec(user, msg);
+            }
+        } catch (error) {
+            console.error(`Error executing command "${msg.text}" for user ${user.id}:`, error);
+            await Cache.bot.sendMessage(msg.chat.id, 'Произошла внутренняя ошибка. Мы уже работаем над этим.');
         }
     }
 }

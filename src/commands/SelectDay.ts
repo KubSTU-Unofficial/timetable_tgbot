@@ -18,13 +18,7 @@ export default class AnotherDayCommand extends Command {
 
         let keyboard = user.group.selectDayKeyboard();
 
-        // FIXME: Костыль с вызовом getTextSchedule делается для того, чтобы загрузить в кэш расписание, если его нет
-        if (!keyboard.length) {
-            await user.group.getTextSchedule();
-            keyboard = user.group.selectDayKeyboard();
-        }
-
-        Cache.bot.sendMessage(user.id, 'Выбери день на кнопке или впиши дату в формате "ГГГГ-ММ-ДД"', {
+        Cache.bot.sendMessage(user.id, 'Выбери день на кнопке или впиши дату в формате "ДД.ММ.ГГГГ"', {
             reply_markup: {
                 keyboard: keyboard,
                 resize_keyboard: true,

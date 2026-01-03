@@ -5,6 +5,8 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import APIConvertor from '../shared/lib/APIConvertor.js';
 
+
+// FIXME: Исправить ошибку одинакового edit текста
 export default class FakQuery extends Query {
     name = ['settings'];
 
@@ -17,9 +19,9 @@ export default class FakQuery extends Query {
         const sendErrorMessage = (replyText = 'Что-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer') => {
             return Cache.bot.editMessageText(
                 text
-                .split('\n\n')
-                .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') + '\n\n' +
+                    .split('\n\n')
+                    .slice(0, text.split('\n\n').length - 1)
+                    .join('\n\n') + '\n\n' +
                 replyText,
                 {
                     chat_id: query.message!.chat.id,
@@ -35,22 +37,22 @@ export default class FakQuery extends Query {
             },
         };
 
-        if(!fak) {
+        if (!fak) {
             let inline_keyboard: InlineKeyboardButton[][] = [[]];
 
             let i = 0;
-            for(let f in faculties) {
+            for (let f in faculties) {
                 // @ts-expect-error faculties[f] точно существует
-                inline_keyboard[i].push({ text: f, callback_data: `settings__${fo}__${faculties[f]}`});
+                inline_keyboard[i].push({ text: f, callback_data: `settings__${fo}__${faculties[f]}` });
 
-                if(inline_keyboard[i].length >= 4) inline_keyboard[++i] = [];
+                if (inline_keyboard[i].length >= 4) inline_keyboard[++i] = [];
             }
 
             return Cache.bot.editMessageText(
                 text
-                .split('\n\n')
-                .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') +
+                    .split('\n\n')
+                    .slice(0, text.split('\n\n').length - 1)
+                    .join('\n\n') +
                 '\n\nКакой у тебя институт/факультет?',
                 {
                     chat_id: query.message.chat.id,
@@ -62,17 +64,17 @@ export default class FakQuery extends Query {
             );
         }
 
-        if(!year) {
+        if (!year) {
             let inline_keyboard: InlineKeyboardButton[][] = [[]];
-            for(let i = 1;i <= 6; i++) {
-                inline_keyboard[0].push({text: `${i}`, callback_data: `settings__${fo}__${fak}__${i}`});
+            for (let i = 1; i <= 6; i++) {
+                inline_keyboard[0].push({ text: `${i}`, callback_data: `settings__${fo}__${fak}__${i}` });
             }
 
             return Cache.bot.editMessageText(
                 text
-                .split('\n\n')
-                .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') + '\n\nКакой у тебя курс?',
+                    .split('\n\n')
+                    .slice(0, text.split('\n\n').length - 1)
+                    .join('\n\n') + '\n\nКакой у тебя курс?',
                 {
                     chat_id: query.message.chat.id,
                     message_id: query.message.message_id,
@@ -81,17 +83,17 @@ export default class FakQuery extends Query {
             );
         }
 
-        if(!group) {
+        if (!group) {
             let now: Date = new Date();
             let groupDate = (now.getFullYear() - +year + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-            let groupsListResp = await APIConvertor.groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: fak, kurs: year, foe: fo as 'ofo' | 'zfo'});
+            let groupsListResp = await APIConvertor.groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: fak, kurs: year, foe: fo as 'ofo' | 'zfo' });
 
-            if(!groupsListResp?.isok) {
+            if (!groupsListResp?.isok) {
                 console.log(groupsListResp);
                 return sendErrorMessage();
             }
 
-            if(!groupsListResp.data.length) return sendErrorMessage("Список групп пуст. Попробуй ещё раз или обратись за помощью @Elektroplayer");
+            if (!groupsListResp.data.length) return sendErrorMessage("Список групп пуст. Попробуй ещё раз или обратись за помощью @Elektroplayer");
 
             let groupNames = groupsListResp.data.map(g => g.name);
             let groupInfo = groupsInfo[+fak];
@@ -100,20 +102,20 @@ export default class FakQuery extends Query {
 
             let inline_keyboard: InlineKeyboardButton[][] = [[]];
             let i = 0;
-            for(let grName of groupNames) {
+            for (let grName of groupNames) {
                 inline_keyboard[i].push({
                     text: grName.substring(groupInfo?.substring ?? 3),
                     callback_data: `settings__${fo}__${fak}__${year}__${grName}`
                 });
 
-                if(inline_keyboard[i].length >= 4) inline_keyboard[++i] = [];
+                if (inline_keyboard[i].length >= 4) inline_keyboard[++i] = [];
             }
 
             return Cache.bot.editMessageText(
                 text
-                .split('\n\n')
-                .slice(0, text.split('\n\n').length - 1)
-                .join('\n\n') +
+                    .split('\n\n')
+                    .slice(0, text.split('\n\n').length - 1)
+                    .join('\n\n') +
                 `\n\nКакая у тебя группа: ${groupDate}-${groupInfo?.identifier ?? ''}...\n<i>Если группы видно не полностью, попробуй перевернуть телефон</i>`,
                 {
                     chat_id: query.message.chat.id,

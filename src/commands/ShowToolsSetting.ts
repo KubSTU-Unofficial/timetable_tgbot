@@ -6,15 +6,15 @@ import Cache from '../lib/Cache.js';
 export default class ShowTeachersCommand extends Command {
     name = {
         buttons: [
-            { title: 'Убрать инструменты', emoji: '⚙️' },
             { title: 'Показать инструменты', emoji: '⚙️' },
+            { title: 'Убрать инструменты', emoji: '⚙️' },
         ],
     };
 
     sceneName = ['settings'];
 
     async exec(user: User, msg: Message): Promise<void> {
-        let showTools = Command.commandName({ buttons: { title: 'Показать инструменты', emoji: '⚙️' } }).includes(msg.text!);
+        let showTools = msg.text?.includes('Показать инструменты'); // Command.commandName({ buttons: { title: 'Показать инструменты', emoji: '⚙️' } }).includes(msg.text!);
 
         await user.updateData({ showTools });
         user.setScene('main');

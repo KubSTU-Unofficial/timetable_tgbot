@@ -14,7 +14,7 @@ export default class NotificationSettingsCommand extends Command {
     sceneName = ['settings'];
 
     async exec(user: User, msg: Message): Promise<void> {
-        let notifications = Command.commandName({ buttons: { title: 'Включить напоминания', emoji: '🔔' } }).includes(msg.text!);
+        let notifications = msg.text?.includes("Включить напоминания"); // this.getAliases().includes(msg.text!);
 
         user.updateData({ notifications });
         user.setScene('main');

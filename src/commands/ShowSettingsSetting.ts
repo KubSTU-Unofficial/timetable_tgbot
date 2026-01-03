@@ -6,15 +6,15 @@ import Cache from '../lib/Cache.js';
 export default class TodayCommand extends Command {
     name = {
         buttons: [
-            { title: 'Убрать настройки', emoji: '⚙️' },
             { title: 'Показать настройки', emoji: '⚙️' },
+            { title: 'Убрать настройки', emoji: '⚙️' },
         ],
     };
 
     sceneName = ['settings'];
 
     async exec(user: User, msg: Message): Promise<void> {
-        let showSettings = Command.commandName({ buttons: { title: 'Показать настройки', emoji: '⚙️' } }).includes(msg.text!);
+        let showSettings = msg.text?.includes("Показать настройки"); // Command.commandName({ buttons: { title: 'Показать настройки', emoji: '⚙️' } }).includes(msg.text!);
 
         await user.updateData({ showSettings });
         user.setScene('main');

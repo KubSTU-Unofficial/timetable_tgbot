@@ -23,7 +23,7 @@ export default class User extends BaseUser {
         let userData = await Users.findOne({ userId: this.id }).lean().exec();
 
         if(userData?.inst_id && userData?.group) {
-            this.group = Cache.getGroup(userData.group, userData.inst_id);
+            this.group = await Cache.getGroup(userData.group, userData.inst_id);
             this.notifications = userData?.notifications ?? false;
             this.emoji = userData?.emoji ?? true;
             this.showSettings = userData?.showSettings ?? true;
@@ -47,7 +47,7 @@ export default class User extends BaseUser {
     }) {
         await Users.findOneAndUpdate({ userId: this.id }, opt, { upsert: true });
 
-        if(opt.inst_id != undefined && opt.group != undefined) this.group = Cache.getGroup(opt.group, opt.inst_id); // this.setGroup(opt.group, opt.instId);
+        if(opt.inst_id != undefined && opt.group != undefined) this.group = await Cache.getGroup(opt.group, opt.inst_id); // this.setGroup(opt.group, opt.instId);
 
         if(opt.notifications != undefined) this.notifications = opt.notifications;
         if(opt.emoji != undefined) this.emoji = opt.emoji;

@@ -7,12 +7,22 @@ import BaseGroup from '../shared/structures/Group.js';
 import Query from '../structures/Query.js';
 
 class Cache {
-    bot: TelegramBot = new TelegramBot(process.env.TOKEN, { polling: true });
+    bot!: TelegramBot;
     users = new Map<number, User>();
-    // groups: IUnifiedGroup[] = [];
     groups = new Map<string, IUnifiedGroup>();
     scenes: Scene[] = [];
     queries: Query[] = [];
+
+    /**
+     * Инициализирует инстанс бота. Должен вызываться один раз при старте.
+     */
+    init() {
+        this.bot = new TelegramBot(process.env.TOKEN, { polling: {
+            params: {
+                allowed_updates: ["message", "callback_query", "polling_error"], // any other update types
+            }
+        }});
+    }
 
     async getUser(userId: number) {
         if (this.users.has(userId)) return this.users.get(userId)!;
@@ -24,15 +34,16 @@ class Cache {
         return newUser;
     }
 
-    getGroup(name: string, instId: number): IUnifiedGroup {
+    async getGroup(name: string, instId: number): Promise<IUnifiedGroup> {
         if (this.groups.has(name)) return this.groups.get(name)!;
 
-        let newGroup = BaseGroup.isZFOGroup(name) ? new ZGroup(name, instId) : new OGroup(name, instId);
+        let newGroup = await ((await BaseGroup.isZFOGroup(name)) ? new ZGroup(name, instId) : new OGroup(name, instId)).init();
 
         this.groups.set(name, newGroup);
 
         return newGroup;
     }
 }
+
 
 export default new Cache();

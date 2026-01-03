@@ -16,7 +16,6 @@ declare global {
     // Для правильной работы Date, с изменённым прототипом
     interface Date {
         getWeek(): number;
-        stringDate(): string;
     }
 
     // Костыль, но работает
@@ -35,7 +34,7 @@ declare global {
         getRawTeachersList(): Promise<string[]>;
         getRawTeachersAndDisciplines(): Promise<{ [key: string]: { [key: string]: string[] } }>;
 
-        isZFOGroup(): boolean;
+        isZFOGroup(): Promise<boolean> | boolean;
 
         selectDayKeyboard(date: Date = new Date()): KeyboardButton[][];
     }

@@ -1,9 +1,6 @@
 import mongoose from 'mongoose';
 import Main from './structures/Main.js';
 
-mongoose.set('strictQuery', true);
-mongoose.connect(process.env.MONGO_URI); // Подключаем MongoDB
-
 // Сделано для определения чётности недели
 // Returns the ISO week of the date.
 // Source: https://weeknumber.net/how-to/javascript
@@ -15,13 +12,21 @@ Date.prototype.getWeek = function () {
     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
 };
 
-Date.prototype.stringDate = function () {
-    return `${this.getDate()}.${this.getMonth() + 1}.${this.getFullYear()}`;
-};
-
 console.dlog = (...args: unknown[]) => {
-    if(process.argv.includes('--debug')) console.log(...args);
+    if (process.argv.includes('--debug')) console.log(...args);
 };
 
-let main = new Main(); // Создание класса и запуск начальных процессов
-main.run();
+async function startApp() {
+    try {
+        mongoose.set('strictQuery', true);
+        await mongoose.connect(process.env.MONGO_URI);
+
+        const main = new Main(); // Создание класса и запуск начальных процессов
+        main.run();
+    } catch (error) {
+        console.error('Failed to connect to MongoDB:', error);
+        process.exit(1);
+    }
+}
+
+startApp();

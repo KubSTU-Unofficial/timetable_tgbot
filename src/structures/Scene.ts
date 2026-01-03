@@ -1,23 +1,38 @@
-import { readdirSync } from 'fs';
 import Command from './Command.js';
-import Query from './Query.js';
 
 export default class Scene {
-    commands: Command[] = [];
-    queries: Query[] = [];
+    private commandMap = new Map<string, Command>();
+    private catchAllCommand?: Command;
 
-    constructor(public name: string) {
-        this.importCommands();
+    constructor(
+        public name: string,
+        public commands: Command[] = []
+    ) {
+        this.buildSceneCommandMap();
     }
 
-    async importCommands() {
-        for(let dirent of readdirSync('./dist/commands/', { withFileTypes: true })) {
-            if(!dirent.name.endsWith('.js')) continue;
+    private buildSceneCommandMap() {
+        for (const command of this.commands) {
+            const aliases = command.getAliases();
 
-            let commandClass = (await import('../commands/' + dirent.name)).default;
-            let command: Command = new commandClass();
+            if (aliases.length === 0) {
+                if (this.catchAllCommand) console.warn(`[loader] Внимание: в сцене "${this.name}" обнаружено несколько "безымянных" команд. Будет использоваться только одна.`);
 
-            if(command.sceneName.length == 0 || command.sceneName.includes(this.name)) this.commands.push(command);
+                this.catchAllCommand = command;
+            } else {
+                for (const alias of aliases) {
+                    this.commandMap.set(alias, command);
+                }
+            }
         }
+    }
+
+    findCommand(text: string): Command | undefined {
+        // Сначала ищем точное совпадение
+        const command = this.commandMap.get(text);
+        if (command) return command;
+
+        // Если не нашли, возвращаем "безымянную" команду
+        return this.catchAllCommand;
     }
 }
