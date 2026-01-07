@@ -60,9 +60,7 @@ export default class Main {
         let users = await Users.find({ notifications: true }).lean().exec();
 
         let dateToday = new Date();
-        console.log(dateToday);
         let dateTomorrow = new Date(dateToday.valueOf() + 1000 * 60 * 60 * 24);
-
         let lastFinishedLessonIndex = this.getLastFinishedLessonIndex(dateToday);
 
         console.log('[notify] Начинаю отправлять уведомления ');
