@@ -2,28 +2,54 @@ import { Message } from 'node-telegram-bot-api';
 import Command from '../structures/Command.js';
 import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
+import SponsorMessagesMiddleware from '../middlewares/RandomMessages.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
+import { getMonday } from '../shared/lib/Utils.js';
+import { isValid, parse } from 'date-fns';
 
-export default class AnotherDayCommand extends Command {
-    name = { buttons: { title: 'Выбрать день', emoji: '🔀' } };
-    sceneName = ['main'];
+export default class SelectingDayCommand extends Command {
+    name = {};
+    sceneName = ['selectDay'];
+    middlewares = [SponsorMessagesMiddleware, GroupTestMiddleware];
 
-    middlewares = [GroupTestMiddleware];
+    days = ['Нечёт Пн', 'Нечёт Вт', 'Нечёт Ср', 'Нечёт Чт', 'Нечёт Пт', 'Нечёт Сб', 'Чёт Пн', 'Чёт Вт', 'Чёт Ср', 'Чёт Чт', 'Чёт Пт', 'Чёт Сб'];
 
     async exec(user: User, msg: Message): Promise<void> {
-        if (msg.chat.type !== 'private') return;
-        if (!user.group) return;
+        if (!user.group || msg.chat.type !== 'private' || !msg.text) return;
 
-        user.setScene('selectDay');
+        user.setScene('main');
 
-        let keyboard = user.group.selectDayKeyboard();
+        let date = parse(msg.text?.replace(/-/g, '.'), 'd.M.yyyy', new Date()); // new Date(msg.text);
+        let text;
 
-        Cache.bot.sendMessage(user.id, 'Выбери день на кнопке или впиши дату в формате "ДД.ММ.ГГГГ"', {
+        if (!isNaN(date.valueOf()) && isValid(date)) text = await user.group.getTextSchedule(date, { showDate: true });
+        else {
+            let index = this.days.indexOf(msg.text);
+
+            if (index == -1)
+                text =
+                    'Неверный ввод.\n\n<i>Возможно дата написана неверно. При возникновении проблем обратись <a href="https://t.me/Elektroplayer">сюда</a></i>';
+            else {
+                let day = (index + 1) % 6 || 6;
+                let week = index >= 6;
+
+                // Получаем дату выбранного дня
+                date = getMonday(new Date());
+                date.setDate(date.getDate() - 1 + day + ((date.getWeek() % 2 == 0) == week ? 0 : 7));
+
+                text = await user.group.getTextSchedule(date, { showDate: true });
+            }
+        }
+
+        // let text = await user.group.getTextSchedule(date, { showDate: true });
+
+        Cache.bot.sendMessage(msg.chat.id, text, {
+            parse_mode: 'HTML',
             reply_markup: {
-                keyboard: keyboard,
+                keyboard: user.getMainKeyboard(),
                 resize_keyboard: true,
-                one_time_keyboard: true,
             },
+            disable_web_page_preview: true,
         });
     }
 }

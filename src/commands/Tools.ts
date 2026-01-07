@@ -19,13 +19,18 @@ export default class ToolsCommand extends Command {
 
         user.setScene('tools');
 
-        Cache.bot.sendMessage(msg.chat.id, 'Добро пожаловать в меню превосходства над обычным расписанием', {
-            reply_markup: {
-                keyboard: user.getToolsKeyboard(),
-                remove_keyboard: true,
-                resize_keyboard: true,
-                //one_time_keyboard: true
-            },
-        });
+        Cache.bot.sendMessage(msg.chat.id, '<b>Добро пожаловать в меню превосходства над обычным расписанием!</b>\n' +
+            '<i>Инструменты могут быть неточными! <a href="https://github.com/KubSTU-Unofficial/timetable_tgbot?tab=readme-ov-file#%D1%87%D0%B0%D1%81%D1%82%D0%BE-%D0%B7%D0%B0%D0%B4%D0%B0%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B">Подробнее тут</a>.</i>',
+            {
+                parse_mode: 'HTML',
+                disable_web_page_preview: true,
+                reply_markup: {
+                    keyboard: user.getToolsKeyboard(),
+                    remove_keyboard: true,
+                    resize_keyboard: true,
+                    //one_time_keyboard: true
+                },
+            }
+        );
     }
 }

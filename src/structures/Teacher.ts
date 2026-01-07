@@ -2,8 +2,41 @@ import { days, getMonday } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
 import { ILessonSchema } from '../shared/models/LessonModel.js';
 import { format, isSameDay, addDays } from 'date-fns';
+import BaseGroup from '../shared/structures/Group.js';
 
 export default class Teacher extends BaseTeacher {
+    static teachers: Map<string, Teacher> = new Map();
+
+    static getTeacher(name: string) {
+        if (Teacher.teachers.has(name)) return Teacher.teachers.get(name);
+
+        let t = new Teacher(name);
+
+        Teacher.teachers.set(name, t);
+
+        return t;
+    }
+
+    async getTextDayTimetable(date: Date = new Date()) {
+        let tt = await this.getAndStoreDayTimetable(date);
+
+        if (!tt) return undefined;
+
+        const dict = [undefined, 'Лек', 'Прак', 'Лаб'];
+        let out = `<b>${days[date.getDay()]} / ${date.getWeek() % 2 == 0 ? 'Чётная' : 'Нечётная'} неделя / ${format(date, 'd.M.yyyy')}</b>\n` +
+            `<i>> ${this.name}\n</i>\n`;
+
+        if (!tt.length) return out + "Здесь пусто. Преподаватель отдыхает";
+
+        return out + tt.reduce(
+            (acc, lesson) => acc + `${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}]\n` +
+                `  Время: ${BaseGroup.lessonsTime[lesson.timing.lessonNumber].join(' - ')}\n` +
+                `  Аудитория: ${lesson.classroom ?? "Не назначена"}\n` +
+                `  Группа(ы): ${lesson.group}\n\n`,
+            ''
+        );
+    }
+
     getWeekDates(startDate: Date): Date[] {
         const result: Date[] = [];
         for (let i = 0; i < 7; i++) {
@@ -56,7 +89,7 @@ export default class Teacher extends BaseTeacher {
         const now = new Date();
         const curMonday = getMonday(now);
         const nextMonday = addDays(curMonday, 7);
-        
+
         let out: string[] = [];
         let currentMessage = '';
 

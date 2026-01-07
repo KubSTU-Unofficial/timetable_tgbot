@@ -85,7 +85,7 @@ export default class FinalQuery extends Query {
         if (number < 8) keyboard[0].push(makeBtn('Следующая', number + 1));
 
         Cache.bot.editMessageText(
-            `<b>Поиск свободных аудиторий</b> (на сегодняшний день)\n<i>Этот инструмент может совершать ошибки. <a href="https://github.com/KubSTU-Unofficial/timetable_tgbot?tab=readme-ov-file#%D1%87%D0%B0%D1%81%D1%82%D0%BE-%D0%B7%D0%B0%D0%B4%D0%B0%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B">Подробнее тут</a>.</i>\n\n${number} пара:\n\n` + text,
+            `<b>Поиск свободных аудиторий</b> (на сегодняшний день)\n\n${number} пара:\n\n` + text,
             {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',

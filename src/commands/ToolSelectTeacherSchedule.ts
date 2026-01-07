@@ -4,7 +4,7 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
 
-export default class TodayCommand extends Command {
+export default class SelectTeacherCommand extends Command {
     name = {
         buttons: [
             { title: 'Расписания преподавателей', emoji: '👨‍🏫' },
@@ -21,33 +21,13 @@ export default class TodayCommand extends Command {
         return `${nameArr[0]} ${nameArr[1][0]}. ${nameArr[2][0]}.`;
     }
 
-    buttonFormat(text: string) {
-        return { text };
-    }
-
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group) return;
 
-        let teachers: string[] = await user.group.getRawTeachersList();
-
-        if (!teachers.length) {
-            Cache.bot.sendMessage(msg.chat.id, 'Преподаватели не найдены!', {
-                parse_mode: 'HTML',
-                reply_markup: {
-                    keyboard: user.getMainKeyboard(),
-                    resize_keyboard: true,
-                    remove_keyboard: msg.chat.type !== 'private',
-                },
-            });
-
-            user.setScene('main');
-
-            return;
-        }
-
         user.setScene('teachers');
 
-        let buttons = teachers.map((name) => this.buttonFormat(this.nameFormat(name)));
+        let teachers: string[] = await user.group.getRawTeachersList();
+        let buttons = teachers.map((name) => ({ text: this.nameFormat(name) }));
         let keyboard: { text: string }[][] = [];
 
         buttons.forEach((elm, i) => {
@@ -55,15 +35,11 @@ export default class TodayCommand extends Command {
             else keyboard[Math.floor(i / 2)] = [elm];
         });
 
-        keyboard.push([
-            {
-                text: (user.emoji ? '🛑 ' : '') + 'Отмена',
-            },
-        ]);
+        keyboard.push([{ text: (user.emoji ? '🛑 ' : '') + 'Отмена' }]);
 
         Cache.bot.sendMessage(
             msg.chat.id,
-            'Выбери преподавателя из списка или введи его ФИО полностью без ошибок\n\n<i>Расписание преподавателя составляется на основе <u>расписаний студентов</u> ОФО и ЗФО, поэтому может содержать неточности!</i>',
+            '<b>Расписание преподавателей</b>\n\nВыбери преподавателя из списка или введи имя, фамилию или отчество:',
             {
                 parse_mode: 'HTML',
                 reply_markup: {
