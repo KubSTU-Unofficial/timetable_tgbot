@@ -69,7 +69,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 
             if (!groupInfo) groupInfo = groupClass.getGroupInfoDefault();
 
-            groupBulk.push({ // TODO: Добавить FoE. Мутация внешнего массива - не самый чистый способ. Перед добавлением экзаменов нужно найти более правильный код.
+            groupBulk.push({ // TODO: Мутация внешнего массива - не самый чистый способ. Перед добавлением экзаменов нужно найти более правильный код.
                 updateOne: {
                     filter: { name: groupClass.name, fakId: groupClass.instId },
                     update: {
@@ -78,6 +78,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
                             year: groupInfo.year,
                             lessonsStartDate: groupInfo.lessonsPeriod?.[0],
                             lessonsEndDate: groupInfo.lessonsPeriod?.[1],
+                            FoE: groupClass.isZFOGroup() ? 3 : 1,
                         }
                     },
                     upsert: true,
