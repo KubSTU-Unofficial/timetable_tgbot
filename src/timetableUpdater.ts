@@ -32,8 +32,6 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
         constructor() {
             let p: Promise<unknown> = Promise.resolve(0);
 
-            console.log(process.argv);
-
             if (process.argv.includes('--force'))
                 p = p.then(() => {
                     return this.removeAllData();

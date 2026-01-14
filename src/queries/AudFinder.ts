@@ -95,6 +95,6 @@ export default class FinalQuery extends Query {
                     inline_keyboard: keyboard,
                 },
             },
-        );
+        ).catch(this.errorCatcher);
     }
 }

@@ -6,7 +6,6 @@ import Cache from '../lib/Cache.js';
 import APIConvertor from '../shared/lib/APIConvertor.js';
 
 
-// FIXME: Исправить ошибку одинакового edit текста
 export default class FakQuery extends Query {
     name = ['settings'];
 
@@ -16,7 +15,7 @@ export default class FakQuery extends Query {
         let text = query.message!.text;
         let [, fo, fak, year, group] = query.data!.split("__");
 
-        const sendErrorMessage = (replyText = 'Что-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer') => {
+        const sendErrorMessage = async (replyText = 'Что-то пошло не так! Повтори попытку позже... \nЕсли проблема не уходит, обратись в поддержку: @Elektroplayer') => {
             return Cache.bot.editMessageText(
                 text
                     .split('\n\n')
@@ -27,7 +26,7 @@ export default class FakQuery extends Query {
                     chat_id: query.message!.chat.id,
                     message_id: query.message!.message_id,
                 },
-            );
+            ).catch(this.errorCatcher);
         };
 
         const groupsInfo: { [key: number]: { substring: number; identifier: string } | undefined } = {
@@ -61,7 +60,7 @@ export default class FakQuery extends Query {
                     disable_web_page_preview: true,
                     parse_mode: 'HTML',
                 },
-            );
+            ).catch(this.errorCatcher);
         }
 
         if (!year) {
@@ -80,7 +79,7 @@ export default class FakQuery extends Query {
                     message_id: query.message.message_id,
                     reply_markup: { inline_keyboard },
                 },
-            );
+            ).catch(this.errorCatcher);
         }
 
         if (!group) {
@@ -123,7 +122,7 @@ export default class FakQuery extends Query {
                     reply_markup: { inline_keyboard },
                     parse_mode: 'HTML',
                 },
-            );
+            ).catch(this.errorCatcher);
         }
 
         user.updateData({ inst_id: +fak, group });
@@ -135,7 +134,7 @@ export default class FakQuery extends Query {
                 chat_id: query.message.chat.id,
                 message_id: query.message.message_id,
             },
-        );
+        ).catch(this.errorCatcher);
 
         Cache.bot.sendMessage(user.id, 'Выберете, что вам нужно на клавиатуре', {
             reply_markup: {

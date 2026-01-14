@@ -1,5 +1,5 @@
 import { days } from '../shared/lib/Utils.js';
-import BaseGroup from '../shared/structures/Group.js';
+import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
 import APIConvertor, { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
 import BaseZGroup from '../shared/structures/ZGroup.js';
@@ -14,11 +14,14 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
 
         lessons.forEach((elm) => {
             para += `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]`
-                + `  \n  Время: ${BaseGroup.lessonsTime[elm.timing.lessonNumber].join(' - ')}`
+                + `  \n  Время: ${Group.lessonsTime[elm.timing.lessonNumber].join(' - ')}`
                 + `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}`
                 + `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
 
-            if (elm.comment) para += `\n  Примечание: ${elm.comment}`;
+            if (elm.comment) para += `\n  Примечание: ${elm.comment
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")}`;
 
             out += para;
             para = '';
@@ -101,7 +104,7 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
             const dateObject = parse(dayKey, 'dd.MM.yyyy', new Date());
 
             daysText.push(
-                `<b>${days[dateObject.getDay()]} | ${dayKey}, ${BaseGroup.lessonsTime[lessonsForDay[0].timing.lessonNumber][0]} - ${BaseGroup.lessonsTime[lessonsForDay[lessonsForDay.length - 1].timing.lessonNumber][1]}</b>\n` +
+                `<b>${days[dateObject.getDay()]} | ${dayKey}, ${Group.lessonsTime[lessonsForDay[0].timing.lessonNumber][0]} - ${Group.lessonsTime[lessonsForDay[lessonsForDay.length - 1].timing.lessonNumber][1]}</b>\n` +
                 lessonsForDay.reduce(
                     (acc, lesson) =>
                         acc +

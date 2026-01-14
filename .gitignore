@@ -6,4 +6,5 @@
 bun.lockb
 /dist
 package-lock.json
+bun.lock
 TODO

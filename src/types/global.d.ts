@@ -34,10 +34,10 @@ declare global {
         getRawTeachersList(): Promise<string[]>;
         getRawTeachersAndDisciplines(): Promise<{ [key: string]: { [key: string]: string[] } }>;
 
-        isZFOGroup(): Promise<boolean> | boolean;
+        isZFOGroup(): boolean;
 
         selectDayKeyboard(date: Date = new Date()): KeyboardButton[][];
     }
 }
 
-export {};
+export { };

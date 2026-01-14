@@ -1,5 +1,5 @@
 import { days, weekNumber, daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
-import BaseGroup from '../shared/structures/Group.js';
+import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
 import APIConvertor, { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
 import BaseOGroup from '../shared/structures/OGroup.js';
@@ -15,14 +15,17 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
 
         lessons.forEach((elm) => {
             para += `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]` +
-                `\n  Время: ${BaseGroup.lessonsTime[elm.timing.lessonNumber].join(' - ')}` +
+                `\n  Время: ${Group.lessonsTime[elm.timing.lessonNumber].join(' - ')}` +
                 `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}` +
                 `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
 
             if (elm.percentOfGroup && elm.percentOfGroup != 100) para += `\n  Процент группы: ${elm.percentOfGroup}%`;
             if (elm.timing.weeks) para += `\n  Период: c ${elm.timing.weeks.from} по ${elm.timing.weeks.to} неделю`;
             if (elm.isStream) para += '\n  В лекционном потоке';
-            if (elm.comment) para += `\n  Примечание: ${elm.comment}`;
+            if (elm.comment) para += `\n  Примечание: ${elm.comment
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")}`;
 
             if (weekNum && elm.timing.weeks && (elm.timing.weeks.from > weekNum || elm.timing.weeks.to < weekNum)) para = `<i>${para}</i>`;
 
@@ -107,7 +110,7 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
 
             if (curDayLessons.length)
                 out +=
-                    `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${BaseGroup.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${BaseGroup.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
+                    `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${Group.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
                     curDayLessons.reduce(
                         (acc, lesson) =>
                             acc +
