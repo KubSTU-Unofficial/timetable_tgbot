@@ -169,6 +169,8 @@ export default class User {
             ], [
                 { text: (this.emoji ? '🔍 ' : '') + 'Свободная аудитория' },
             ], [
+                { text: (this.emoji ? '👨‍🏫 ' : '') + 'Кто что ведёт' },
+            ], [
                 { text: (this.emoji ? '🛑 ' : '') + 'Отмена' },
             ],
         ];

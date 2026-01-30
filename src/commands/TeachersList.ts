@@ -4,9 +4,13 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
 
-export default class TodayCommand extends Command {
-    name = { command: 'teachers' };
-    sceneName = ['main'];
+export default class TeachersCommand extends Command {
+    name = {
+        command: 'teachers',
+        buttons: { title: 'Кто что ведёт', emoji: '👨‍🏫' }
+    };
+
+    sceneName = ['main', 'tools'];
     middlewares = [GroupTestMiddleware];
 
     async exec(user: User, msg: Message): Promise<void> {
@@ -25,8 +29,14 @@ export default class TodayCommand extends Command {
 
         Cache.bot.sendMessage(msg.chat.id, out, {
             parse_mode: 'HTML',
-            reply_markup: { remove_keyboard: msg.chat.type !== 'private' },
+            reply_markup: {
+                keyboard: user.getMainKeyboard(),
+                resize_keyboard: true,
+                remove_keyboard: msg.chat.type !== 'private'
+            },
             disable_web_page_preview: true,
         });
+
+        user.setScene('main');
     }
 }
