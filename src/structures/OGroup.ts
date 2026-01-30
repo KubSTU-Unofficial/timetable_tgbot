@@ -74,7 +74,10 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
             schedule = fullRawSchedule.filter((p) => p.timing.weeks && p.timing.weeks.type == week && p.timing.weeks.dayOfWeek == day);
             eventsText = await this.getTextEvents(date);
 
-            if (schedule.length || eventsText) break;
+            if ((schedule.length && schedule.some((tt) =>
+                tt.timing.weeks!.startDate && tt.timing.weeks!.startDate < date &&
+                tt.timing.weeks!.endDate && tt.timing.weeks!.endDate > date
+            )) || eventsText) break; // Проверяет, есть ли хотя бы одна пара, которая сегодня действительно будет
             else date.setDate(date.getDate() + 1);
         }
 
