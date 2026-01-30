@@ -21,7 +21,7 @@ export default class QueryEvent extends Event {
 
             const execQuery = Cache.queries.find((q) => q.name.some((n) => query.data!.startsWith(n)));
 
-            if (!execQuery) {
+            if (!execQuery) { // TODO: отловить ошибку
                 await Cache.bot.editMessageText('Похоже, эта кнопка себя исчерпала.', {
                     chat_id: chatId,
                     message_id: query.message.message_id,

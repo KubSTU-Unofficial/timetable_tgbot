@@ -6,7 +6,7 @@ import Query from './Query.js';
 import Command from './Command.js';
 
 export default class Main {
-    scenesNames = ['main', 'selectDay', 'settings', 'teachers', 'tools'];
+    scenesNames = ['main', 'selectDay', 'settings', 'groupset', 'teachers', 'tools'];
 
     async run() {
         Cache.init();

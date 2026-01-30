@@ -15,7 +15,7 @@ export default class StartCommand extends Command {
         if (msg.chat.type !== 'private') {
             if (!user.group) {
                 replytext += 'Конкретно у тебя не установлена некоторая важная для меня информация. Давай поговорим в личных сообщениях.';
-            } else {
+            } else { // TODO: Можно чуть-чуть полирнуть
                 replytext +=
                     'Можешь воспользоваться командами снизу:\n\n/today - Расписание на сегодня\n/tomorrow - Расписание на завтра\n/nearest - Ближайшее расписание\n/about - Информация о боте';
             }
@@ -28,10 +28,10 @@ export default class StartCommand extends Command {
         }
 
         if (!user.group) {
-            user.scene = Cache.scenes.find((s) => s.name == 'settings');
-            replytext += 'У тебя не установлена некоторая важная для меня информация. Подскажи пожалуйста,\n\nКакая у тебя форма обучения?';
+            user.setScene('groupset');
+            replytext += 'Для того, чтобы я мог показывать тебе расписание, мне нужно узнать твою группу. Ты можешь или прокликать кнопки ниже, или написать имя группы в чат. Если ты не туда нажал, ты всегда можешь перенастроить бота (Настройки > Перенастроить бота)\n\nКакая у тебя форма обучения?';
 
-            Cache.bot.sendMessage(msg.chat.id, replytext, {
+            await Cache.bot.sendMessage(msg.chat.id, replytext, {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
                 reply_markup: {
@@ -45,7 +45,9 @@ export default class StartCommand extends Command {
                 },
             });
 
-            Cache.bot.sendMessage(msg.chat.id, `При возникновении проблем, прочтите <a href="https://github.com/KubSTU-Unofficial/timetable_tgbot/blob/main/README.md#%D1%87%D0%B0%D1%81%D1%82%D0%BE-%D0%B7%D0%B0%D0%B4%D0%B0%D0%B2%D0%B0%D0%B5%D0%BC%D1%8B%D0%B5-%D0%B2%D0%BE%D0%BF%D1%80%D0%BE%D1%81%D1%8B">F.A.Q.</a>\nЕсли оно не помогло, обратитесь мне в ЛС: <a href="https://t.me/Elektroplayer">тык</a>`, {
+            let linkFAQ = "https://github.com/KubSTU-Unofficial/timetable_tgbot/blob/main/README.md#часто-задаваемые-вопросы"
+            await Cache.bot.sendMessage(msg.chat.id, `При возникновении проблем, прочти <a href="${linkFAQ}">F.A.Q.</a>\n` +
+                `Если это не помогло, обратись мне в ЛС: <a href="https://t.me/Elektroplayer">тык</a>`, {
                 disable_web_page_preview: true,
                 parse_mode: 'HTML',
             });
