@@ -26,7 +26,8 @@
     },
     "scripts": {
         "start": "bun run .",
-        "notifications": "bun run src/notificationsSend.ts"
+        "notifications": "bun run src/notificationsSend.ts",
+        "ttu": "bun run src/timetableUpdater.ts"
     },
     "author": "Elektroplayer",
     "license": "ISC",
