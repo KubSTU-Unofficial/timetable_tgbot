@@ -126,18 +126,11 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
     }
 
     async getTextExams() {
-        // let date = new Date();
-        let groupInfo = await this.getAndStoreGroupInfo();
-        let ugod = groupInfo.year;
-        let sem = groupInfo.sem;
+        let exams = await this.getAndStoreExams();
 
-        // TODO: Вынести в отдельный метод с получением из БД
-        let resp = await APIConvertor.exam(this.name, ugod, sem);
+        if (!exams?.length) return `У меня нет расписания экзаменов для твоей группы...`;
 
-        if (!resp || !resp.isok) return undefined;
-        if (!resp.data.length) return `У меня нет расписания экзаменов для твоей группы...`;
-
-        let examsText = resp.data.reduce(
+        let examsText = exams.reduce(
             (acc, x) =>
                 acc +
                 `<b>${format(x.date, "dd.MM.yyyy, H:mm")} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,

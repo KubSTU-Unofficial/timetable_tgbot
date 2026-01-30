@@ -138,16 +138,11 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
     }
 
     async getTextExams() {
-        // TODO: Вынести в отдельный метод с получением из БД
-        let groupInfo = await this.getAndStoreGroupInfo();
-        let year = groupInfo.year;
-        let sem = groupInfo.sem;
-        let resp = await APIConvertor.exam(this.name, year, sem);
+        let exams = await this.getAndStoreExams();
 
-        if (!resp?.isok) return undefined;
-        if (!resp.data.length) return `У меня нет расписания экзаменов для твоей группы...`;
+        if (!exams?.length) return `У меня нет расписания экзаменов для твоей группы...`;
 
-        let examsText = resp.data.reduce(
+        let examsText = exams.reduce(
             (acc, x) =>
                 acc +
                 `<b>${format(x.date, "dd.MM.yyyy, H:mm")} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,
