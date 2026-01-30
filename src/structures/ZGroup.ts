@@ -1,7 +1,7 @@
 import { days } from '../shared/lib/Utils.js';
 import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
-import APIConvertor, { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
+import { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
 import BaseZGroup from '../shared/structures/ZGroup.js';
 import { KeyboardButton } from 'node-telegram-bot-api';
 import { ILessonSchema } from '../shared/models/LessonModel.js';

@@ -1,7 +1,7 @@
 import { days, weekNumber, daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
 import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
-import APIConvertor, { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
+import { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
 import BaseOGroup from '../shared/structures/OGroup.js';
 import { KeyboardButton } from 'node-telegram-bot-api';
 import { ILessonSchema } from '../shared/models/LessonModel.js';
@@ -111,15 +111,15 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
         for (let i = 1; i <= 7; i++) {
             let curDayLessons = currWeekLessons.filter((p) => p.timing.weeks && p.timing.weeks.dayOfWeek == i);
 
-            if (curDayLessons.length)
-                out +=
-                    `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${Group.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
-                    curDayLessons.reduce(
-                        (acc, lesson) =>
-                            acc +
-                            `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] ${lesson.classroom ? `(${lesson.classroom})` : ''} \n`,
-                        '',
-                    );
+            if (curDayLessons.length) out +=
+                `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${Group.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
+                curDayLessons.reduce((acc, lesson) => {
+                    let text = `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] ${lesson.classroom ? `(${lesson.classroom})` : ''} \n`
+
+                    if (lesson.timing.weeks && lesson.timing.weeks.startDate && lesson.timing.weeks.endDate && !(lesson.timing.weeks.startDate < currentDate && lesson.timing.weeks.endDate > currentDate)) text = `<i>${text}</i>`;
+
+                    return acc + text;
+                }, '');
 
             currentDate.setDate(currentDate.getDate() + 1);
         }
