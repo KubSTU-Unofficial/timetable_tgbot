@@ -17,9 +17,10 @@ export default class TeachersCommand extends Command {
         if (!user.group) return;
 
         let lessons: { [key: string]: { [key: string]: string[] } } = await user.group.getRawTeachersAndDisciplines();
-        let out = `<b><u>ПРЕДМЕТЫ И ПРЕПОДАВАТЕЛИ</u></b>\n\n`;
+        let out = `<b><u>ПРЕДМЕТЫ И ПРЕПОДАВАТЕЛИ:</u></b>\n\n`;
 
-        for (let lesson in lessons) {
+        if (!lessons.length) out += "<i>Здесь пусто...</i>"
+        else for (let lesson in lessons) {
             out += `<b>${lesson}:</b>`;
             for (let teacher in lessons[lesson]) {
                 out += `\n  ${teacher} [${lessons[lesson][teacher].join(', ')}]`;
