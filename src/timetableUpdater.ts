@@ -5,6 +5,7 @@ import GroupModel, { IGroupSchema } from './shared/models/GroupModel.js';
 import Group from './shared/structures/Group.js';
 import OGroup from './shared/structures/OGroup.js';
 import ZGroup from './shared/structures/ZGroup.js';
+import bootstrap from './shared/bootstrap.js';
 
 type GroupBulkOperations = mongoose.AnyBulkWriteOperation<IGroupSchema>[] | { updateOne: { filter: { name: string; fakId: number; }; update: { $set: { sem: number; year: number; lessonsStartDate?: Date; lessonsEndDate?: Date; }; }; upsert: boolean; }; }[];
 type GroupConstructor<T extends Group> = new (name: string, fakId: number) => T;
@@ -12,16 +13,17 @@ type GroupConstructor<T extends Group> = new (name: string, fakId: number) => T;
 // Сделано для определения чётности недели
 // Returns the ISO week of the date.
 // Source: https://weeknumber.net/how-to/javascript
-Date.prototype.getWeek = function () {
-    let date = new Date(this.getTime());
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-    let week1 = new Date(date.getFullYear(), 0, 4);
-    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-};
+// Date.prototype.getWeek = function () {
+//     let date = new Date(this.getTime());
+//     date.setHours(0, 0, 0, 0);
+//     date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+//     let week1 = new Date(date.getFullYear(), 0, 4);
+//     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+// };
 
-mongoose.set('strictQuery', true);
-mongoose.connect(process.env.MONGO_URI).then(() => {
+// mongoose.set('strictQuery', true);
+// mongoose.connect(process.env.MONGO_URI)
+bootstrap().then(() => {
     new (class Main {
         now = new Date();
         defaultYear = this.now.getFullYear() - (this.now.getMonth() >= 6 ? 0 : 1);
@@ -125,7 +127,7 @@ mongoose.connect(process.env.MONGO_URI).then(() => {
 
             const groups = resp.data.map(g => ({
                 name: g.name,
-                fakId: g.inst_id,
+                fakId: g.fakId,
             }));
 
             const groupBulk: GroupBulkOperations = [];

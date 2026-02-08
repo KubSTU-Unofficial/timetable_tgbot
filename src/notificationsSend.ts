@@ -4,17 +4,19 @@ import Users from './shared/models/TgUsersModel.js';
 import Group from './shared/structures/Group.js';
 import OGroup from './structures/OGroup.js';
 import ZGroup from './structures/ZGroup.js';
+import bootstrap from './shared/bootstrap.js';
+
 
 // Сделано для определения чётности недели
 // Returns the ISO week of the date.
 // Source: https://weeknumber.net/how-to/javascript
-Date.prototype.getWeek = function () {
-    let date = new Date(this.getTime());
-    date.setHours(0, 0, 0, 0);
-    date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
-    let week1 = new Date(date.getFullYear(), 0, 4);
-    return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
-};
+// Date.prototype.getWeek = function () {
+//     let date = new Date(this.getTime());
+//     date.setHours(0, 0, 0, 0);
+//     date.setDate(date.getDate() + 3 - ((date.getDay() + 6) % 7));
+//     let week1 = new Date(date.getFullYear(), 0, 4);
+//     return 1 + Math.round(((date.getTime() - week1.getTime()) / 86400000 - 3 + ((week1.getDay() + 6) % 7)) / 7);
+// };
 
 export default class Main {
     groups: Map<string, OGroup | ZGroup> = new Map();
@@ -109,7 +111,8 @@ export default class Main {
     }
 }
 
-mongoose.set('strictQuery', true);
-mongoose
-    .connect(process.env.MONGO_URI)
+bootstrap()
+    // mongoose.set('strictQuery', true);
+    // mongoose
+    // .connect(process.env.MONGO_URI)
     .then(async () => await new Main().exec(), console.log);
