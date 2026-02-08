@@ -3,8 +3,11 @@
 /.vscode
 /.idea
 .prettierrc
-bun.lockb
+
 /dist
+
 package-lock.json
 bun.lock
+pnpm-lock.yaml
+
 TODO

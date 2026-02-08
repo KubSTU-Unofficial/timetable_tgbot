@@ -19,7 +19,7 @@ export default class Main {
 
     private async loadModules<T>(pattern: string): Promise<T[]> {
         const modules: T[] = [];
-        const files = await glob(`src/${pattern}`, { cwd: process.cwd(), absolute: true });
+        const files = await glob(`dist/${pattern}`, { cwd: process.cwd(), absolute: true });
 
         for (const file of files) {
             try {
@@ -34,7 +34,7 @@ export default class Main {
     }
 
     async initEvents() {
-        const events = await this.loadModules<Event>('events/**/*.ts');
+        const events = await this.loadModules<Event>('events/**/*.js');
         for (const event of events) {
             console.log(`[loader] [+] Ивент ${event.constructor.name}`);
             Cache.bot.on(event.name, event.exec.bind(event));
@@ -42,8 +42,8 @@ export default class Main {
     }
 
     private async loadAllModules() {
-        const commands = await this.loadModules<Command>('commands/**/*.ts');
-        Cache.queries = await this.loadModules<Query>('queries/**/*.ts');
+        const commands = await this.loadModules<Command>('commands/**/*.js');
+        Cache.queries = await this.loadModules<Query>('queries/**/*.js');
 
         commands.forEach(c => console.log(`[loader] [+] Команда ${c.constructor.name}`));
         Cache.queries.forEach(q => console.log(`[loader] [+] Запрос ${q.constructor.name}`));
