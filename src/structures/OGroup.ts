@@ -71,7 +71,7 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
             day = date.getDay();
             week = date.getWeek() % 2 == 0;
 
-            schedule = fullRawSchedule.filter((p) => p.timing.weeks && p.timing.weeks.type == week && p.timing.weeks.dayOfWeek == day);
+            schedule = fullRawSchedule.filter((p) => p.timing.weeks && p.timing.weeks.isEven == week && p.timing.weeks.dayOfWeek == day);
             eventsText = await this.getTextEvents(date);
 
             if ((schedule.length && schedule.some((tt) =>
@@ -104,7 +104,7 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
 
         let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
         let dict = [undefined, 'Лек', 'Прак', 'Лаб'];
-        let currWeekLessons = schedule.filter((elm) => elm.timing.weeks && elm.timing.weeks.type == week);
+        let currWeekLessons = schedule.filter((elm) => elm.timing.weeks && elm.timing.weeks.isEven == week);
 
         if (!currWeekLessons.length) return out + 'Здесь ничего нет...';
 
