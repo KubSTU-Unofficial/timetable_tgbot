@@ -27,7 +27,7 @@ async function getOccupiedClassrooms(building: string) {
             $match: {
                 $or: [
                     {
-                        'timing.weeks.type': now.getWeek() % 2 == 0,
+                        'timing.weeks.isEven': now.getWeek() % 2 == 0,
                         'timing.weeks.dayOfWeek': now.getDay(),
                         'timing.weeks.startDate': { $lte: now },
                         'timing.weeks.endDate': { $gte: now },
