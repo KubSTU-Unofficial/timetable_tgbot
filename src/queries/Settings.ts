@@ -104,10 +104,10 @@ export default class FakQuery extends Query {
                 if (inline_keyboard[i].length >= 4) inline_keyboard[++i] = [];
             }
 
-            let names = ["простичтокурсники", "первокурсники", "второкурсники", "третьекурсники", "старшекурсники"] // Мне лень, ахах
+            let names = ["простичтокурсники", "первокурсников", "второкурсников", "третьекурсников", "старшекурсников"] // Мне лень, ахах
 
             return Cache.bot.editMessageText(
-                `<b>Финишная прямая!</b> Это все ${names[+year > 4 ? 4 : +year]} которые я смог найти! <i>Если группы видно не полностью, попробуй перевернуть телефон</i>\n\nИтак, твоя группа: ${groupDate}-${groupInfo?.identifier ?? ''}...`,
+                `<b>Финишная прямая!</b> Это все группы ${names[+year > 4 ? 4 : +year]}, которые я смог найти! <i>Если группы видно не полностью, попробуй перевернуть телефон</i>\n\nИтак, твоя группа: ${groupDate}-${groupInfo?.identifier ?? ''}...`,
                 {
                     chat_id: query.message.chat.id,
                     message_id: query.message.message_id,
