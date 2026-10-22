@@ -28,4 +28,4 @@ jobs:
               with:
                   context: .
                   push: true
-                  tags: ghcr.io/kubstu-unofficial/kubstu_timetable_tgbot:latest
+                  tags: ghcr.io/kubstu-unofficial/timetable_tgbot:latest
