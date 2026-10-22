@@ -1,4 +1,4 @@
-import { days } from '../shared/lib/Utils.js';
+import { days, parityOfWeek } from '../shared/lib/Utils.js';
 import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
 import { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
@@ -13,15 +13,17 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         let para = '';
 
         lessons.forEach((elm) => {
-            para += `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]`
-                + `  \n  Время: ${Group.lessonsTime[elm.timing.lessonNumber].join(' - ')}`
-                + `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}`
-                + `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
+            para +=
+                `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]` +
+                `  \n  Время: ${Group.lessonsTime[elm.timing.lessonNumber].join(' - ')}` +
+                `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}` +
+                `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
 
-            if (elm.comment) para += `\n  Примечание: ${elm.comment
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")}`;
+            if (elm.comment)
+                para += `\n  Примечание: ${elm.comment
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')}`;
 
             out += para;
             para = '';
@@ -30,9 +32,12 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         return out;
     }
 
-    async getTextSchedule(date = new Date(), opts: { showDate?: boolean } = {}) {
+    async getTextSchedule(
+        date = new Date(),
+        opts: { showDate?: boolean } = {},
+    ) {
         let day = date.getDay();
-        let week = date.getWeek() % 2 == 0;
+        let week = parityOfWeek(date); // date.getWeek() % 2 == 0;
         let lessons = await this.getTimetable({ date });
 
         if (!lessons)
@@ -51,9 +56,12 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
     async getTextNextSchedule() {
         let fullRawSchedule = await this.getTimetable();
 
-        if (!fullRawSchedule || !fullRawSchedule.length) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+        if (!fullRawSchedule || !fullRawSchedule.length)
+            return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
-        let sortedSchedule = fullRawSchedule.sort((a, b) => a.timing.date!.getTime() - b.timing.date!.getTime());
+        let sortedSchedule = fullRawSchedule.sort(
+            (a, b) => a.timing.date!.getTime() - b.timing.date!.getTime(),
+        );
         let closestDate: Date | undefined;
         let now = new Date();
 
@@ -64,14 +72,17 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
             }
         }
 
-        if (!closestDate) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+        if (!closestDate)
+            return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
-        let schedule: ILessonSchema[] = sortedSchedule.filter((pair) => pair.timing.date!.valueOf() == closestDate.valueOf());
+        let schedule: ILessonSchema[] = sortedSchedule.filter(
+            (pair) => pair.timing.date!.valueOf() == closestDate.valueOf(),
+        );
         let eventsText = await this.getTextEvents(closestDate);
         let textSchedule = this.formatSchedule(schedule);
 
         let day: number = closestDate.getDay();
-        let week: boolean = closestDate.getWeek() % 2 == 0;
+        let week: boolean = parityOfWeek(closestDate); // closestDate.getWeek() % 2 == 0;
 
         return (
             `<b>${days[day]} / ${week ? 'Чётная' : 'Нечётная'} неделя / ${format(closestDate, 'd.M.yyyy')}</b>` +
@@ -84,19 +95,23 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
         const schedule = await this.getTimetable();
         if (!schedule) return null;
 
-        if (!schedule.length) return [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\nЗдесь ничего нет...`];
+        if (!schedule.length)
+            return [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\nЗдесь ничего нет...`];
 
         const out = [`<u><b>ПОЛНОЕ РАСПИСАНИЕ:</b></u>\n\n`];
         const dict = [undefined, 'Лек', 'Прак', 'Лаб'];
 
-        const grouped = schedule.reduce((acc, item) => {
-            if (item.timing.date) {
-                const dateKey = format(item.timing.date, 'dd.MM.yyyy');
-                if (!acc[dateKey]) acc[dateKey] = [];
-                acc[dateKey].push(item);
-            }
-            return acc;
-        }, {} as Record<string, ILessonSchema[]>);
+        const grouped = schedule.reduce(
+            (acc, item) => {
+                if (item.timing.date) {
+                    const dateKey = format(item.timing.date, 'dd.MM.yyyy');
+                    if (!acc[dateKey]) acc[dateKey] = [];
+                    acc[dateKey].push(item);
+                }
+                return acc;
+            },
+            {} as Record<string, ILessonSchema[]>,
+        );
 
         const daysText: string[] = [];
         for (const dayKey in grouped) {
@@ -105,12 +120,12 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
 
             daysText.push(
                 `<b>${days[dateObject.getDay()]} | ${dayKey}, ${Group.lessonsTime[lessonsForDay[0].timing.lessonNumber][0]} - ${Group.lessonsTime[lessonsForDay[lessonsForDay.length - 1].timing.lessonNumber][1]}</b>\n` +
-                lessonsForDay.reduce(
-                    (acc, lesson) =>
-                        acc +
-                        `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] (${lesson.classroom})\n`,
-                    '',
-                ),
+                    lessonsForDay.reduce(
+                        (acc, lesson) =>
+                            acc +
+                            `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] (${lesson.classroom})\n`,
+                        '',
+                    ),
             );
         }
 
@@ -128,12 +143,13 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
     async getTextExams() {
         let exams = await this.getAndStoreExams();
 
-        if (!exams?.length) return `У меня нет расписания экзаменов для твоей группы...`;
+        if (!exams?.length)
+            return `У меня нет расписания экзаменов для твоей группы...`;
 
         let examsText = exams.reduce(
             (acc, x) =>
                 acc +
-                `<b>${format(x.date, "dd.MM.yyyy, H:mm")} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,
+                `<b>${format(x.date, 'dd.MM.yyyy, H:mm')} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,
             '',
         );
 
@@ -158,7 +174,10 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
 
         let dayEvents = await Events.find(filter);
         let out = dayEvents.reduce(
-            (acc, elm, i) => acc + `\n\n${i + 1}. <b>${elm.name}</b>` + (elm.note ? `\n  ${elm.note.replace('\n', '\n  ')}` : ''),
+            (acc, elm, i) =>
+                acc +
+                `\n\n${i + 1}. <b>${elm.name}</b>` +
+                (elm.note ? `\n  ${elm.note.replace('\n', '\n  ')}` : ''),
             '',
         );
 
@@ -168,10 +187,12 @@ export default class ZGroup extends BaseZGroup implements IUnifiedGroup {
     selectDayKeyboard(): KeyboardButton[][] {
         if (!this.cache.timetable) return [];
 
-        const datesTS = this.cache.timetable.map((l) => l.timing.date!.getTime());
+        const datesTS = this.cache.timetable.map((l) =>
+            l.timing.date!.getTime(),
+        );
         const buttons = Array.from(new Set(datesTS))
             .sort((a, b) => a - b)
-            .map((ts) => ({ text: format(new Date(ts), "dd.MM.yyyy") }));
+            .map((ts) => ({ text: format(new Date(ts), 'dd.MM.yyyy') }));
 
         let out: KeyboardButton[][] = [];
 

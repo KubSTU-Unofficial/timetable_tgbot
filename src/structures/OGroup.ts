@@ -1,4 +1,11 @@
-import { days, weekNumber, daysOdd, daysEven, getMonday } from '../shared/lib/Utils.js';
+import {
+    days,
+    weekNumber,
+    daysOdd,
+    daysEven,
+    getMonday,
+    parityOfWeek,
+} from '../shared/lib/Utils.js';
 import Group from '../shared/structures/Group.js';
 import Events from '../shared/models/EventsModel.js';
 import { LessonTypesShorted } from '../shared/lib/APIConvertor.js';
@@ -8,26 +15,41 @@ import { ILessonSchema } from '../shared/models/LessonModel.js';
 import { format } from 'date-fns';
 
 export default class OGroup extends BaseOGroup implements IUnifiedGroup {
-    formatSchedule(lessons: ILessonSchema[], date = new Date(), lessonsPeriod?: Date[] | undefined) {
+    formatSchedule(
+        lessons: ILessonSchema[],
+        date = new Date(),
+        lessonsPeriod?: Date[] | undefined,
+    ) {
         let out = '';
         let para = '';
-        let weekNum = date && lessonsPeriod ? weekNumber(lessonsPeriod[0], date) : null;
+        let weekNum =
+            date && lessonsPeriod ? weekNumber(lessonsPeriod[0], date) : null;
 
         lessons.forEach((elm) => {
-            para += `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]` +
+            para +=
+                `\n\n${elm.timing.lessonNumber} пара: ${elm.name} [${LessonTypesShorted[elm.type]}]` +
                 `\n  Время: ${Group.lessonsTime[elm.timing.lessonNumber].join(' - ')}` +
                 `\n  Преподаватель: ${elm.teacherName ?? 'Не назначен'}` +
                 `\n  Аудитория: ${elm.classroom ?? 'Не назначена'}`;
 
-            if (elm.percentOfGroup && elm.percentOfGroup != 100) para += `\n  Процент группы: ${elm.percentOfGroup}%`;
-            if (elm.timing.weeks) para += `\n  Период: c ${elm.timing.weeks.from} по ${elm.timing.weeks.to} неделю`;
+            if (elm.percentOfGroup && elm.percentOfGroup != 100)
+                para += `\n  Процент группы: ${elm.percentOfGroup}%`;
+            if (elm.timing.weeks)
+                para += `\n  Период: c ${elm.timing.weeks.from} по ${elm.timing.weeks.to} неделю`;
             if (elm.isStream) para += '\n  В лекционном потоке';
-            if (elm.comment) para += `\n  Примечание: ${elm.comment
-                .replace(/&/g, "&amp;")
-                .replace(/</g, "&lt;")
-                .replace(/>/g, "&gt;")}`;
+            if (elm.comment)
+                para += `\n  Примечание: ${elm.comment
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')}`;
 
-            if (weekNum && elm.timing.weeks && (elm.timing.weeks.from > weekNum || elm.timing.weeks.to < weekNum)) para = `<i>${para}</i>`;
+            if (
+                weekNum &&
+                elm.timing.weeks &&
+                (elm.timing.weeks.from > weekNum ||
+                    elm.timing.weeks.to < weekNum)
+            )
+                para = `<i>${para}</i>`;
 
             out += para;
             para = '';
@@ -36,9 +58,12 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
         return out;
     }
 
-    async getTextSchedule(date = new Date(), opts: { showDate?: boolean } = {}) {
+    async getTextSchedule(
+        date = new Date(),
+        opts: { showDate?: boolean } = {},
+    ) {
         let day = date.getDay();
-        let week = date.getWeek() % 2 == 0;
+        let week = parityOfWeek(date); // date.getWeek() % 2 == 0;
         let groupInfo = await this.getAndStoreGroupInfo();
         let lessons = await this.getTimetable({ date });
 
@@ -59,7 +84,8 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
         let groupInfo = await this.getAndStoreGroupInfo();
         let fullRawSchedule = await this.getTimetable();
 
-        if (!fullRawSchedule || !fullRawSchedule.length) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+        if (!fullRawSchedule || !fullRawSchedule.length)
+            return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
         let date = new Date(Date.now() + 1000 * 60 * 60 * 24),
             day: number = 0,
@@ -69,21 +95,39 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
 
         for (let i = 0; i <= 14; i++) {
             day = date.getDay();
-            week = date.getWeek() % 2 == 0;
+            week = parityOfWeek(date); // date.getWeek() % 2 == 0;
 
-            schedule = fullRawSchedule.filter((p) => p.timing.weeks && p.timing.weeks.isEven == week && p.timing.weeks.dayOfWeek == day);
+            schedule = fullRawSchedule.filter(
+                (p) =>
+                    p.timing.weeks &&
+                    p.timing.weeks.isEven == week &&
+                    p.timing.weeks.dayOfWeek == day,
+            );
             eventsText = await this.getTextEvents(date);
 
-            if ((schedule.length && schedule.some((tt) =>
-                tt.timing.weeks!.startDate && tt.timing.weeks!.startDate < date &&
-                tt.timing.weeks!.endDate && tt.timing.weeks!.endDate > date
-            )) || eventsText) break; // Проверяет, есть ли хотя бы одна пара, которая сегодня действительно будет
+            if (
+                (schedule.length &&
+                    schedule.some(
+                        (tt) =>
+                            tt.timing.weeks!.startDate &&
+                            tt.timing.weeks!.startDate < date &&
+                            tt.timing.weeks!.endDate &&
+                            tt.timing.weeks!.endDate > date,
+                    )) ||
+                eventsText
+            )
+                break; // Проверяет, есть ли хотя бы одна пара, которая сегодня действительно будет
             else date.setDate(date.getDate() + 1);
         }
 
-        if (!schedule.length && !eventsText) return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
+        if (!schedule.length && !eventsText)
+            return '<b>Ближайшего расписания не найдено...</b> <i>или что-то пошло не так...</i>';
 
-        let textSchedule = this.formatSchedule(schedule, date, groupInfo?.lessonsPeriod);
+        let textSchedule = this.formatSchedule(
+            schedule,
+            date,
+            groupInfo?.lessonsPeriod,
+        );
 
         return (
             `<b>${days[day]} / ${week ? 'Чётная' : 'Нечётная'} неделя / ${format(date, 'd.M.yyyy')}</b>` +
@@ -97,29 +141,45 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
         if (!schedule) return null;
 
         let currentDate = new Date(startDate);
-        let week = currentDate.getWeek() % 2 == 0;
-        let num = this.cache.lessonsPeriod ? weekNumber(this.cache.lessonsPeriod[0], currentDate) : null;
+        let week = parityOfWeek(currentDate); // currentDate.getWeek() % 2 == 0;
+        let num = this.cache.lessonsPeriod
+            ? weekNumber(this.cache.lessonsPeriod[0], currentDate)
+            : null;
 
         num = num && num <= 0 ? null : num;
 
         let out = `<u><b>${week ? 'ЧЁТНАЯ' : 'НЕЧЁТНАЯ'} НЕДЕЛЯ${num ? ` | №${num}` : ''}:</b></u>\n`;
         let dict = [undefined, 'Лек', 'Прак', 'Лаб'];
-        let currWeekLessons = schedule.filter((elm) => elm.timing.weeks && elm.timing.weeks.isEven == week);
+        let currWeekLessons = schedule.filter(
+            (elm) => elm.timing.weeks && elm.timing.weeks.isEven == week,
+        );
 
         if (!currWeekLessons.length) return out + 'Здесь ничего нет...';
 
         for (let i = 1; i <= 7; i++) {
-            let curDayLessons = currWeekLessons.filter((p) => p.timing.weeks && p.timing.weeks.dayOfWeek == i);
+            let curDayLessons = currWeekLessons.filter(
+                (p) => p.timing.weeks && p.timing.weeks.dayOfWeek == i,
+            );
 
-            if (curDayLessons.length) out +=
-                `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${Group.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
-                curDayLessons.reduce((acc, lesson) => {
-                    let text = `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] ${lesson.classroom ? `(${lesson.classroom})` : ''} \n`
+            if (curDayLessons.length)
+                out +=
+                    `\n<b>${days[i]} | ${format(currentDate, 'd.M.yyyy')}, ${Group.lessonsTime[curDayLessons[0].timing.lessonNumber][0]} - ${Group.lessonsTime[curDayLessons[curDayLessons.length - 1].timing.lessonNumber][1]}</b>\n` +
+                    curDayLessons.reduce((acc, lesson) => {
+                        let text = `  ${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}] ${lesson.classroom ? `(${lesson.classroom})` : ''} \n`;
 
-                    if (lesson.timing.weeks && lesson.timing.weeks.startDate && lesson.timing.weeks.endDate && !(lesson.timing.weeks.startDate < currentDate && lesson.timing.weeks.endDate > currentDate)) text = `<i>${text}</i>`;
+                        if (
+                            lesson.timing.weeks &&
+                            lesson.timing.weeks.startDate &&
+                            lesson.timing.weeks.endDate &&
+                            !(
+                                lesson.timing.weeks.startDate < currentDate &&
+                                lesson.timing.weeks.endDate > currentDate
+                            )
+                        )
+                            text = `<i>${text}</i>`;
 
-                    return acc + text;
-                }, '');
+                        return acc + text;
+                    }, '');
 
             currentDate.setDate(currentDate.getDate() + 1);
         }
@@ -133,7 +193,10 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
         let nextMonday = new Date(curMonday);
         nextMonday.setDate(nextMonday.getDate() + 7);
 
-        let out = [await this.getTextHalfFullSchedule(curMonday), await this.getTextHalfFullSchedule(nextMonday)];
+        let out = [
+            await this.getTextHalfFullSchedule(curMonday),
+            await this.getTextHalfFullSchedule(nextMonday),
+        ];
 
         if (out.some((s) => s == null)) return [];
 
@@ -143,12 +206,13 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
     async getTextExams() {
         let exams = await this.getAndStoreExams();
 
-        if (!exams?.length) return `У меня нет расписания экзаменов для твоей группы...`;
+        if (!exams?.length)
+            return `У меня нет расписания экзаменов для твоей группы...`;
 
         let examsText = exams.reduce(
             (acc, x) =>
                 acc +
-                `<b>${format(x.date, "dd.MM.yyyy, H:mm")} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,
+                `<b>${format(x.date, 'dd.MM.yyyy, H:mm')} / ${x.name}</b>\n  Преподаватель: ${x.teacher}\n  Аудитория: ${x.classroom}\n\n`,
             '',
         );
 
@@ -186,7 +250,10 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
 
         let dayEvents = await Events.find(filter);
         let out = dayEvents.reduce(
-            (acc, elm, i) => acc + `\n\n${i + 1}. <b>${elm.name}</b>` + (elm.note ? `\n  ${elm.note.replace('\n', '\n  ')}` : ''),
+            (acc, elm, i) =>
+                acc +
+                `\n\n${i + 1}. <b>${elm.name}</b>` +
+                (elm.note ? `\n  ${elm.note.replace('\n', '\n  ')}` : ''),
             '',
         );
 
@@ -194,9 +261,13 @@ export default class OGroup extends BaseOGroup implements IUnifiedGroup {
     }
 
     selectDayKeyboard(date: Date = new Date()): KeyboardButton[][] {
-        let out: KeyboardButton[][] = [daysOdd.slice().map((elm) => ({ text: elm })), daysEven.slice().map((elm) => ({ text: elm }))];
+        let out: KeyboardButton[][] = [
+            daysOdd.slice().map((elm) => ({ text: elm })),
+            daysEven.slice().map((elm) => ({ text: elm })),
+        ];
 
-        if (getMonday(date).getWeek() % 2 == 0) out.reverse();
+        // if (getMonday(date).getWeek() % 2 == 0) out.reverse();
+        if (parityOfWeek(getMonday(date))) out.reverse();
 
         return out;
     }

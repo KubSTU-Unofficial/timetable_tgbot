@@ -25,7 +25,9 @@
         "typescript": "^5.0.0"
     },
     "scripts": {
-        "start": "NODE_EXTRA_CA_CERTS=src/shared/cert/globalsign-r6.pem node --env-file=.env ./dist/index.js",
+        "build": "npx tsc",
+        "start": "node ./dist/index.js",
+        "startplus": "NODE_EXTRA_CA_CERTS=src/shared/cert/globalsign-r6.pem node ./dist/index.js",
         "notifications": "NODE_EXTRA_CA_CERTS=src/shared/cert/globalsign-r6.pem node --env-file=.env dist/notificationsSend.js",
         "ttu": "NODE_EXTRA_CA_CERTS=src/shared/cert/globalsign-r6.pem node --env-file=.env dist/timetableUpdater.js"
     },

@@ -4,7 +4,7 @@ import User from '../structures/User.js';
 import Cache from '../lib/Cache.js';
 import SponsorMessagesMiddleware from '../middlewares/RandomMessages.js';
 import GroupTestMiddleware from '../middlewares/GroupTestMiddleware.js';
-import { getMonday } from '../shared/lib/Utils.js';
+import { getMonday, parityOfWeek } from '../shared/lib/Utils.js';
 import { isValid, parse } from 'date-fns';
 
 export default class SelectingDayCommand extends Command {
@@ -12,7 +12,20 @@ export default class SelectingDayCommand extends Command {
     sceneName = ['selectDay'];
     middlewares = [SponsorMessagesMiddleware, GroupTestMiddleware];
 
-    days = ['Нечёт Пн', 'Нечёт Вт', 'Нечёт Ср', 'Нечёт Чт', 'Нечёт Пт', 'Нечёт Сб', 'Чёт Пн', 'Чёт Вт', 'Чёт Ср', 'Чёт Чт', 'Чёт Пт', 'Чёт Сб'];
+    days = [
+        'Нечёт Пн',
+        'Нечёт Вт',
+        'Нечёт Ср',
+        'Нечёт Чт',
+        'Нечёт Пт',
+        'Нечёт Сб',
+        'Чёт Пн',
+        'Чёт Вт',
+        'Чёт Ср',
+        'Чёт Чт',
+        'Чёт Пт',
+        'Чёт Сб',
+    ];
 
     async exec(user: User, msg: Message): Promise<void> {
         if (!user.group || msg.chat.type !== 'private' || !msg.text) return;
@@ -22,7 +35,8 @@ export default class SelectingDayCommand extends Command {
         let date = parse(msg.text?.replace(/-/g, '.'), 'd.M.yyyy', new Date()); // new Date(msg.text);
         let text;
 
-        if (!isNaN(date.valueOf()) && isValid(date)) text = await user.group.getTextSchedule(date, { showDate: true });
+        if (!isNaN(date.valueOf()) && isValid(date))
+            text = await user.group.getTextSchedule(date, { showDate: true });
         else {
             let index = this.days.indexOf(msg.text);
 
@@ -35,9 +49,16 @@ export default class SelectingDayCommand extends Command {
 
                 // Получаем дату выбранного дня
                 date = getMonday(new Date());
-                date.setDate(date.getDate() - 1 + day + ((date.getWeek() % 2 == 0) == week ? 0 : 7));
+                date.setDate(
+                    date.getDate() -
+                        1 +
+                        day +
+                        (parityOfWeek(date) == week ? 0 : 7),
+                );
 
-                text = await user.group.getTextSchedule(date, { showDate: true });
+                text = await user.group.getTextSchedule(date, {
+                    showDate: true,
+                });
             }
         }
 

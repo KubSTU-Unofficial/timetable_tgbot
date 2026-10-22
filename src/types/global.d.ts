@@ -1,4 +1,4 @@
-import TelegramBot from 'node-telegram-bot-api';
+import TelegramBot from "node-telegram-bot-api";
 
 declare global {
     namespace NodeJS {
@@ -14,17 +14,20 @@ declare global {
     }
 
     // Для правильной работы Date, с изменённым прототипом
-    interface Date {
-        getWeek(): number;
-    }
-
+    // interface Date {
+    //     getWeek(): number;
+    // }
+    //
     // Костыль, но работает
-    type BotEvents = TelegramBot.MessageType | 'message';
+    type BotEvents = TelegramBot.MessageType | "message";
 
     interface IUnifiedGroup {
         name: string;
 
-        getTextSchedule(date: Date = new Date(), opts: { showDate?: boolean } = {}): Promise<string>;
+        getTextSchedule(
+            date: Date = new Date(),
+            opts: { showDate?: boolean } = {},
+        ): Promise<string>;
         getTextNextSchedule(): Promise<string>;
         getTextFullSchedule(startDate: Date): Promise<string[] | null>;
 
@@ -32,7 +35,9 @@ declare global {
         getTextEvents(date = new Date()): Promise<string | null>;
 
         getRawTeachersList(): Promise<string[]>;
-        getRawTeachersAndDisciplines(): Promise<{ [key: string]: { [key: string]: string[] } }>;
+        getRawTeachersAndDisciplines(): Promise<{
+            [key: string]: { [key: string]: string[] };
+        }>;
 
         isZFOGroup(): boolean;
 
@@ -40,4 +45,4 @@ declare global {
     }
 }
 
-export { };
+export {};

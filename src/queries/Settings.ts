@@ -78,7 +78,7 @@ export default class FakQuery extends Query {
         if (!group) {
             let now: Date = new Date();
             let groupDate = (now.getFullYear() - +year + 1 - (now.getMonth() >= 6 ? 0 : 1)).toString().substring(2);
-            let groupsListResp = await APIConvertor.groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { inst_id: fak, kurs: year, foe: fo as 'ofo' | 'zfo' }); // TODO: А не много ли надежды на безнадёжное API?
+            let groupsListResp = await APIConvertor.groupsList(now.getFullYear() - (now.getMonth() >= 6 ? 0 : 1), { fakId: fak, year: year, foe: fo as 'ofo' | 'zfo' }); // TODO: А не много ли надежды на безнадёжное API?
 
             if (!groupsListResp?.isok) {
                 console.log(groupsListResp);

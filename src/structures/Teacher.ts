@@ -1,9 +1,10 @@
-import { days } from '../shared/lib/Utils.js';
+import { days, parityOfWeek } from '../shared/lib/Utils.js';
 import BaseTeacher from '../shared/structures/Teacher.js';
 import { format } from 'date-fns';
 import Group from '../shared/structures/Group.js';
 
-export default class Teacher extends BaseTeacher { // TODO: отправить получение преподавателя в кеш
+export default class Teacher extends BaseTeacher {
+    // TODO: отправить получение преподавателя в кеш
     static teachers: Map<string, Teacher> = new Map();
 
     static getTeacher(name: string) {
@@ -22,17 +23,23 @@ export default class Teacher extends BaseTeacher { // TODO: отправить �
         if (!tt) return undefined;
 
         const dict = [undefined, 'Лек', 'Прак', 'Лаб'];
-        let out = `<b>${days[date.getDay()]} / ${date.getWeek() % 2 == 0 ? 'Чётная' : 'Нечётная'} неделя / ${format(date, 'd.M.yyyy')}</b>\n` +
+        let out =
+            `<b>${days[date.getDay()]} / ${parityOfWeek(date) ? 'Чётная' : 'Нечётная'} неделя / ${format(date, 'd.M.yyyy')}</b>\n` +
             `<i>&gt; ${this.name}\n</i>\n`;
 
-        if (!tt.length) return out + "Здесь пусто. Преподаватель отдыхает";
+        if (!tt.length) return out + 'Здесь пусто. Преподаватель отдыхает';
 
-        return out + tt.reduce(
-            (acc, lesson) => acc + `${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}]\n` +
-                `  Время: ${Group.lessonsTime[lesson.timing.lessonNumber].join(' - ')}\n` +
-                `  Аудитория: ${lesson.classroom ?? "Не назначена"}\n` +
-                `  Группа(ы): ${lesson.group}\n\n`,
-            ''
+        return (
+            out +
+            tt.reduce(
+                (acc, lesson) =>
+                    acc +
+                    `${lesson.timing.lessonNumber}. ${lesson.name} [${dict[lesson.type]}]\n` +
+                    `  Время: ${Group.lessonsTime[lesson.timing.lessonNumber].join(' - ')}\n` +
+                    `  Аудитория: ${lesson.classroom ?? 'Не назначена'}\n` +
+                    `  Группа(ы): ${lesson.group}\n\n`,
+                '',
+            )
         );
     }
 
